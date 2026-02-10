@@ -1,23 +1,49 @@
-import { useState, PropsWithChildren, ReactNode } from 'react';
+import { useState, PropsWithChildren, ReactNode, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
 import Sidebar from '@/Components/Sidebar';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { usePage } from '@inertiajs/react';
-import { User, PageProps } from '@/types';
+import { User, PageProps as BasePageProps } from '@/types';
 import { Menu, X, ChevronDown, User as UserIcon, LogOut } from 'lucide-react';
+import { Toast } from '@/Components/Toast';
+
+interface PageProps extends BasePageProps {
+    flash: {
+        success: string | null;
+        error: string | null;
+    };
+}
 
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage<PageProps>().props.auth.user;
+    const { auth, flash } = usePage<PageProps>().props;
+    const user = auth.user;
+
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Default to true (expanded) on desktop
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false); // For mobile menu
 
+    useEffect(() => {
+        if (flash.success) {
+            setToast({ message: flash.success, type: 'success' });
+        } else if (flash.error) {
+            setToast({ message: flash.error, type: 'error' });
+        }
+    }, [flash]);
+
     return (
         <div className="min-h-screen bg-gray-100 flex transition-all duration-300">
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
             {/* Sidebar (Desktop) */}
             <Sidebar isOpen={isSidebarOpen} />
 
