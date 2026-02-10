@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\ItemController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -68,6 +69,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/organization', [OrganizationController::class, 'index'])->name('organization.index');
     Route::put('/organization', [OrganizationController::class, 'update'])->name('organization.update');
+
+    // Item Module Routes
+    Route::resource('items', ItemController::class);
+    // For now, simple routes for categories and units or wait for user input?
+    // I'll add them as well since they are needed for normalized items
+    Route::get('item-categories', [ItemController::class, 'categories'])->name('items.categories');
+    Route::post('item-categories', [ItemController::class, 'storeCategory'])->name('items.categories.store');
+    Route::put('item-categories/{category}', [ItemController::class, 'updateCategory'])->name('items.categories.update');
+    Route::delete('item-categories/{category}', [ItemController::class, 'destroyCategory'])->name('items.categories.destroy');
+
+    Route::get('item-units', [ItemController::class, 'units'])->name('items.units');
+    Route::post('item-units', [ItemController::class, 'storeUnit'])->name('items.units.store');
+    Route::put('item-units/{unit}', [ItemController::class, 'updateUnit'])->name('items.units.update');
+    Route::delete('item-units/{unit}', [ItemController::class, 'destroyUnit'])->name('items.units.destroy');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

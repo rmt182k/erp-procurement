@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import SidebarLink from '@/Components/SidebarLink';
-import { LayoutDashboard, Network } from 'lucide-react';
+import { LayoutDashboard, Network, Package } from 'lucide-react';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -48,6 +48,15 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         icon={<Network size={20} />}
                     >
                         Organization
+                    </SidebarLink>
+
+                    <SidebarLink
+                        href={route('items.index')}
+                        active={route().current('items.index')}
+                        isOpen={isOpen}
+                        icon={<Package size={20} />}
+                    >
+                        Master Barang
                     </SidebarLink>
 
                     {/* Add more links here later */}
