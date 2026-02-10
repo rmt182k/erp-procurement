@@ -4,6 +4,7 @@ import Sidebar from '@/Components/Sidebar';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { usePage } from '@inertiajs/react';
 import { User, PageProps } from '@/types';
+import { Menu, X, ChevronDown, User as UserIcon, LogOut } from 'lucide-react';
 
 export default function Authenticated({
     header,
@@ -34,14 +35,7 @@ export default function Authenticated({
                                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                                         className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out hidden md:inline-flex"
                                     >
-                                        <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M4 6h16M4 12h16M4 18h16"
-                                            />
-                                        </svg>
+                                        <Menu className="h-6 w-6" />
                                     </button>
 
                                     {/* Mobile Hamburger */}
@@ -49,22 +43,11 @@ export default function Authenticated({
                                         onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
                                         className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out md:hidden"
                                     >
-                                        <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                            <path
-                                                className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M4 6h16M4 12h16M4 18h16"
-                                            />
-                                            <path
-                                                className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
+                                        {showingNavigationDropdown ? (
+                                            <X className="h-6 w-6" />
+                                        ) : (
+                                            <Menu className="h-6 w-6" />
+                                        )}
                                     </button>
                                 </div>
 
@@ -85,18 +68,7 @@ export default function Authenticated({
                                                 >
                                                     {user.name}
 
-                                                    <svg
-                                                        className="ms-2 -me-0.5 h-4 w-4"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20"
-                                                        fill="currentColor"
-                                                    >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
+                                                    <ChevronDown className="ms-2 -me-0.5 h-4 w-4" />
                                                 </button>
                                             </span>
                                         </Dropdown.Trigger>
@@ -104,25 +76,15 @@ export default function Authenticated({
                                         <Dropdown.Content>
                                             <Dropdown.Link href={route('profile.edit')}>
                                                 <div className="flex items-center">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        strokeWidth={1.5}
-                                                        stroke="currentColor"
-                                                        className="w-5 h-5 mr-2"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                                                        />
-                                                    </svg>
+                                                    <UserIcon className="w-4 h-4 mr-2" />
                                                     Profile
                                                 </div>
                                             </Dropdown.Link>
                                             <Dropdown.Link href={route('logout')} method="post" as="button">
-                                                Log Out
+                                                <div className="flex items-center">
+                                                    <LogOut className="w-4 h-4 mr-2" />
+                                                    Log Out
+                                                </div>
                                             </Dropdown.Link>
                                         </Dropdown.Content>
                                     </Dropdown>
