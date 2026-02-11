@@ -10,7 +10,8 @@ import {
     List as ListIcon,
     Tags,
     Ruler,
-    Search
+    Search,
+    Box
 } from 'lucide-react';
 import { useTrans } from '@/hooks/useTrans';
 import { ItemForm } from './Partials/ItemForm';
@@ -55,82 +56,81 @@ function cls(...inputs: any[]) {
     return inputs.filter(Boolean).join(' ');
 }
 
-type TabType = 'barang' | 'kategori' | 'satuan';
+type TabType = 'items' | 'categories' | 'units';
 
 export default function Index({ items, categories, units, filters }: Props) {
     const { trans } = useTrans();
-    const [activeTab, setActiveTab] = useState<TabType>('barang');
+    const [activeTab, setActiveTab] = useState<TabType>('items');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [searchQuery, setSearchQuery] = useState(filters.search || '');
 
-    // Items Form State
+    // Form States
     const [isItemFormOpen, setIsItemFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Item | null>(null);
 
-    // Category Form State
     const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
 
-    // Unit Form State
     const [isUnitFormOpen, setIsUnitFormOpen] = useState(false);
     const [editingUnit, setEditingUnit] = useState<ItemUnit | null>(null);
 
-    const handleDeleteItem = (id: string) => {
-        if (confirm(trans('Are you sure you want to delete this item?'))) {
-            router.delete(route('items.destroy', id), { preserveScroll: true });
+    const handleDelete = (type: TabType, id: string) => {
+        let routeName = '';
+        let confirmMsg = '';
+
+        switch (type) {
+            case 'items': routeName = 'items.destroy'; confirmMsg = trans('Are you sure you want to delete this item?'); break;
+            case 'categories': routeName = 'items.categories.destroy'; confirmMsg = trans('Are you sure you want to delete this category?'); break;
+            case 'units': routeName = 'items.units.destroy'; confirmMsg = trans('Are you sure you want to delete this unit?'); break;
+        }
+
+        if (confirm(confirmMsg)) {
+            router.delete(route(routeName, id), { preserveScroll: true });
         }
     };
-
-    const handleDeleteCategory = (id: string) => {
-        if (confirm(trans('Are you sure you want to delete this category?'))) {
-            router.delete(route('items.categories.destroy', id), { preserveScroll: true });
-        }
-    };
-
-    const handleDeleteUnit = (id: string) => {
-        if (confirm(trans('Are you sure you want to delete this unit?'))) {
-            router.delete(route('items.units.destroy', id), { preserveScroll: true });
-        }
-    };
-
-    // --- Column Definitions ---
 
     const itemColumns: Column<Item>[] = [
         {
-            header: trans("Info Barang"),
+            header: trans("Item Info"),
             key: 'name',
             sortable: true,
             render: (item) => (
                 <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-900">{item.name}</span>
-                    <span className="text-xs text-gray-500 font-mono mt-0.5">{item.code} • {item.category?.name}</span>
+                    <span className="text-xs text-gray-500 font-mono mt-0.5 uppercase tracking-tight">
+                        {item.code} • {item.category?.name}
+                    </span>
                 </div>
             )
         },
         {
-            header: trans("Harga"),
+            header: trans("Price"),
             key: 'price',
             sortable: true,
             align: 'right',
-            className: 'whitespace-nowrap',
-            render: (item) => `Rp ${Number(item.price).toLocaleString('id-ID')}`
+            render: (item) => <span className="font-mono text-xs font-bold">Rp {Number(item.price).toLocaleString('id-ID')}</span>
         },
         {
-            header: trans("Stok"),
+            header: trans("Stock"),
             key: 'stock',
             sortable: true,
             align: 'center',
-            className: 'whitespace-nowrap',
-            render: (item) => `${item.stock} ${item.unit?.abbreviation}`
+            render: (item) => (
+                <div className="flex flex-col items-center">
+                    <span className="font-bold text-gray-900">{item.stock}</span>
+                    <span className="text-[10px] text-gray-400 uppercase font-bold">{item.unit?.abbreviation}</span>
+                </div>
+            )
         },
         {
             header: trans("Status"),
             key: 'status',
-            className: 'whitespace-nowrap',
+            align: 'center',
             render: (item) => (
                 <span className={cls(
                     "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                    item.status === 'active' ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"
+                    item.status === 'active' ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"
                 )}>
                     {item.status === 'active' ? trans('Active') : trans('Inactive')}
                 </span>
@@ -140,65 +140,89 @@ export default function Index({ items, categories, units, filters }: Props) {
             header: "",
             align: 'right',
             className: 'w-0 whitespace-nowrap',
-            headerClassName: 'w-0',
             render: (item) => (
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingItem(item); setIsItemFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={() => { setEditingItem(item); setIsItemFormOpen(true); }}
+                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                    >
+                        <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => handleDelete('items', item.id)}
+                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
             )
         }
     ];
 
     const categoryColumns: Column<ItemCategory>[] = [
-        { header: trans("Category Name"), key: 'name', sortable: true, className: 'font-semibold' },
-        { header: trans("Description"), key: 'description' },
+        {
+            header: trans("Category Name"),
+            key: 'name',
+            sortable: true,
+            className: 'font-semibold text-gray-900',
+        },
+        {
+            header: trans("Description"),
+            key: 'description',
+            render: (cat) => <span className="text-gray-500 text-sm">{cat.description || '-'}</span>
+        },
         {
             header: "",
             align: 'right',
             className: 'w-0 whitespace-nowrap',
-            headerClassName: 'w-0',
             render: (cat) => (
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingCategory(cat); setIsCategoryFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditingCategory(cat); setIsCategoryFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete('categories', cat.id)} className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )
         }
     ];
 
     const unitColumns: Column<ItemUnit>[] = [
-        { header: trans("Unit Name"), key: 'name', sortable: true, className: 'font-semibold' },
-        { header: trans("Abbreviation"), key: 'abbreviation', align: 'center', className: 'font-mono whitespace-nowrap' },
+        {
+            header: trans("Unit Name"),
+            key: 'name',
+            sortable: true,
+            className: 'font-semibold text-gray-900',
+        },
+        {
+            header: trans("Abbreviation"),
+            key: 'abbreviation',
+            align: 'center',
+            render: (unit) => <span className="px-2 py-1 bg-gray-50 rounded font-mono text-indigo-600 font-bold">{unit.abbreviation}</span>
+        },
         {
             header: "",
             align: 'right',
             className: 'w-0 whitespace-nowrap',
-            headerClassName: 'w-0',
             render: (unit) => (
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingUnit(unit); setIsUnitFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteUnit(unit.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditingUnit(unit); setIsUnitFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete('units', unit.id)} className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )
         }
     ];
 
-    const filteredByCatItems = items.filter(i => !selectedCategory || i.category_id === selectedCategory);
+    const filteredItems = items.filter(i =>
+        (!selectedCategory || i.category_id === selectedCategory) &&
+        (i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            i.code.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
 
-    const TabButton = ({ type, label, icon: Icon }: { type: TabType, label: string, icon: any }) => (
-        <button
-            onClick={() => setActiveTab(type)}
-            className={cls(
-                "flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 transition-all",
-                activeTab === type
-                    ? "border-indigo-600 text-indigo-600 bg-indigo-50/30"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            )}
-        >
-            <Icon className="w-4 h-4" />
-            {label}
-        </button>
+    const filteredCategories = categories.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredUnits = units.filter(u =>
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -213,13 +237,13 @@ export default function Index({ items, categories, units, filters }: Props) {
                     <button
                         className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-semibold"
                         onClick={() => {
-                            if (activeTab === 'barang') { setEditingItem(null); setIsItemFormOpen(true); }
-                            if (activeTab === 'kategori') { setEditingCategory(null); setIsCategoryFormOpen(true); }
-                            if (activeTab === 'satuan') { setEditingUnit(null); setIsUnitFormOpen(true); }
+                            if (activeTab === 'items') { setEditingItem(null); setIsItemFormOpen(true); }
+                            if (activeTab === 'categories') { setEditingCategory(null); setIsCategoryFormOpen(true); }
+                            if (activeTab === 'units') { setEditingUnit(null); setIsUnitFormOpen(true); }
                         }}
                     >
                         <Plus className="w-4 h-4" />
-                        {trans('Add')} {activeTab === 'barang' ? trans('Item') : activeTab === 'kategori' ? trans('Category') : trans('Unit')}
+                        {trans('Add')} {activeTab === 'items' ? trans('Item') : activeTab === 'categories' ? trans('Category') : trans('Unit')}
                     </button>
                 </div>
             }
@@ -227,121 +251,136 @@ export default function Index({ items, categories, units, filters }: Props) {
             <Head title={trans('Master Items')} />
 
             <div className="space-y-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="flex border-b border-gray-100">
-                        <TabButton type="barang" label={trans("Item List")} icon={Package} />
-                        <TabButton type="kategori" label={trans("Manage Categories")} icon={Tags} />
-                        <TabButton type="satuan" label={trans("Manage Units")} icon={Ruler} />
-                    </div>
+                {/* Tabs */}
+                <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl w-fit border border-gray-200 shadow-sm">
+                    <button
+                        onClick={() => setActiveTab('items')}
+                        className={cls(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                            activeTab === 'items' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                        )}
+                    >
+                        <Package className="w-4 h-4" />
+                        {trans('Items')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('categories')}
+                        className={cls(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                            activeTab === 'categories' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                        )}
+                    >
+                        <Tags className="w-4 h-4" />
+                        {trans('Categories')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('units')}
+                        className={cls(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+                            activeTab === 'units' ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                        )}
+                    >
+                        <Ruler className="w-4 h-4" />
+                        {trans('Units')}
+                    </button>
+                </div>
 
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-sm">
                     <div className="p-6">
-                        {activeTab === 'barang' && (
-                            <div className="space-y-6 animate-in fade-in duration-300">
-                                {viewMode === 'list' ? (
-                                    <DataTable
-                                        data={filteredByCatItems}
-                                        columns={itemColumns}
-                                        searchPlaceholder={trans("Search item name or code...")}
-                                        searchKeys={['name', 'code']}
-                                        initialSort={{ key: 'name', order: 'asc' }}
-                                        headerExtra={
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center gap-2 border border-gray-100 rounded-lg p-1 bg-gray-50/50 shadow-sm">
-                                                    <button onClick={() => setViewMode('list')} className="p-1.5 rounded-md transition-all bg-white shadow text-indigo-600" title={trans("List View")}><ListIcon className="w-4 h-4" /></button>
-                                                    <button onClick={() => setViewMode('grid')} className="p-1.5 rounded-md transition-all text-gray-400" title={trans("Grid View")}><LayoutGrid className="w-4 h-4" /></button>
-                                                </div>
-                                                <select
-                                                    className="text-sm bg-gray-50/50 border-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 min-w-[150px] py-2 font-medium text-gray-700 shadow-sm"
-                                                    value={selectedCategory}
-                                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                                >
-                                                    <option value="">{trans("All Categories")}</option>
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        }
-                                    />
-                                ) : (
-                                    <div className="space-y-6">
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div className="relative group flex-1 max-w-md">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
-                                                <input
-                                                    type="text"
-                                                    placeholder={trans("Search item name or code...")}
-                                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center gap-2 border border-gray-100 rounded-lg p-1 bg-gray-50/50 shadow-sm">
-                                                    <button onClick={() => setViewMode('list')} className="p-1.5 rounded-md transition-all text-gray-400"><ListIcon className="w-4 h-4" /></button>
-                                                    <button onClick={() => setViewMode('grid')} className="p-1.5 rounded-md transition-all bg-white shadow text-indigo-600"><LayoutGrid className="w-4 h-4" /></button>
-                                                </div>
-                                                <select
-                                                    className="text-sm bg-gray-50/50 border-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 min-w-[150px] py-2 font-medium text-gray-700 shadow-sm"
-                                                    value={selectedCategory}
-                                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                                >
-                                                    <option value="">{trans("All Categories")}</option>
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all">
-                                            {filteredByCatItems.map(item => (
-                                                <div key={item.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Package className="w-6 h-6" /></div>
-                                                        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => { setEditingItem(item); setIsItemFormOpen(true); }} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"><Edit className="w-4 h-4" /></button>
-                                                            <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                                                        </div>
-                                                    </div>
-                                                    <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                                                    <p className="text-xs text-gray-500 font-mono mb-4">{item.code}</p>
-                                                    <div className="flex justify-between text-xs pt-3 border-t border-gray-50">
-                                                        <span className="font-mono">Rp {Number(item.price).toLocaleString('id-ID')}</span>
-                                                        <span className="font-medium">{item.stock} {item.unit?.abbreviation}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="relative group flex-1 max-w-md">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder={trans("Search...")}
+                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                {activeTab === 'items' && (
+                                    <div className="flex items-center gap-2 border border-gray-100 rounded-lg p-1 bg-gray-50/50 shadow-sm sm:order-2">
+                                        <button onClick={() => setViewMode('list')} className={cls("p-1.5 rounded-md transition-all", viewMode === 'list' ? 'bg-white shadow text-indigo-600' : 'text-gray-400')}><ListIcon className="w-4 h-4" /></button>
+                                        <button onClick={() => setViewMode('grid')} className={cls("p-1.5 rounded-md transition-all", viewMode === 'grid' ? 'bg-white shadow text-indigo-600' : 'text-gray-400')}><LayoutGrid className="w-4 h-4" /></button>
                                     </div>
                                 )}
+                                {activeTab === 'items' && (
+                                    <select
+                                        className="text-sm bg-gray-50/50 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 min-w-[150px] py-2 font-medium text-gray-700 shadow-sm"
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                    >
+                                        <option value="">{trans("All Categories")}</option>
+                                        {categories.map(cat => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
+                        </div>
+
+                        {activeTab === 'items' && (
+                            viewMode === 'list' ? (
+                                <DataTable data={filteredItems} columns={itemColumns} initialSort={{ key: 'name', order: 'asc' }} hideSearch={true} />
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {filteredItems.map((item) => (
+                                        <div key={item.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative group h-full flex flex-col">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Box className="w-4 h-4 text-indigo-600" />
+                                                        <span className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest">{item.code}</span>
+                                                    </div>
+                                                    <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors leading-tight">{item.name}</h3>
+                                                </div>
+                                                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => { setEditingItem(item); setIsItemFormOpen(true); }} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title={trans("Edit")}><Edit className="w-4 h-4" /></button>
+                                                    <button onClick={() => handleDelete('items', item.id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title={trans("Delete")}><Trash2 className="w-4 h-4" /></button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1 mb-6">
+                                                <div className="flex items-center flex-wrap gap-2 mt-2">
+                                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-lg uppercase">{item.category?.name}</span>
+                                                    <span className={cls(
+                                                        "px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase",
+                                                        item.status === 'active' ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"
+                                                    )}>
+                                                        {item.status === 'active' ? trans('Active') : trans('Inactive')}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{trans('Price')}</span>
+                                                    <span className="font-bold text-indigo-600">Rp {Number(item.price).toLocaleString('id-ID')}</span>
+                                                </div>
+                                                <div className="text-right flex flex-col">
+                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{trans('Stock')}</span>
+                                                    <span className="font-bold text-gray-900">{item.stock} <span className="text-[10px] text-gray-500">{item.unit?.abbreviation}</span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
                         )}
 
-                        {activeTab === 'kategori' && (
-                            <div className="space-y-4 animate-in fade-in duration-300">
-                                <DataTable
-                                    data={categories}
-                                    columns={categoryColumns}
-                                    searchPlaceholder={trans("Search category name...")}
-                                    initialSort={{ key: 'name', order: 'asc' }}
-                                />
-                            </div>
+                        {activeTab === 'categories' && (
+                            <DataTable data={filteredCategories} columns={categoryColumns} hideSearch={true} />
                         )}
 
-                        {activeTab === 'satuan' && (
-                            <div className="space-y-4 animate-in fade-in duration-300">
-                                <DataTable
-                                    data={units}
-                                    columns={unitColumns}
-                                    searchPlaceholder={trans("Search unit name or abbreviation...")}
-                                    searchKeys={['name', 'abbreviation']}
-                                    initialSort={{ key: 'name', order: 'asc' }}
-                                />
-                            </div>
+                        {activeTab === 'units' && (
+                            <DataTable data={filteredUnits} columns={unitColumns} hideSearch={true} />
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Forms */}
             <ItemForm isOpen={isItemFormOpen} onClose={() => setIsItemFormOpen(false)} item={editingItem} categories={categories} units={units} />
             <CategoryForm isOpen={isCategoryFormOpen} onClose={() => setIsCategoryFormOpen(false)} category={editingCategory} />
             <UnitForm isOpen={isUnitFormOpen} onClose={() => setIsUnitFormOpen(false)} unit={editingUnit} />

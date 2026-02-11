@@ -371,7 +371,7 @@ export default function Index({ vendors, gl_accounts, currencies, payment_terms,
 
                         {activeTab === 'vendors' && (
                             viewMode === 'list' ? (
-                                <DataTable data={filteredVendors} columns={vendorColumns} initialSort={{ key: 'name', order: 'asc' }} />
+                                <DataTable data={filteredVendors} columns={vendorColumns} initialSort={{ key: 'name', order: 'asc' }} hideSearch={true} />
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {filteredVendors.map((vendor) => (
@@ -407,11 +407,11 @@ export default function Index({ vendors, gl_accounts, currencies, payment_terms,
                         )}
 
                         {activeTab === 'currencies' && (
-                            <DataTable data={filteredCurrencies} columns={currencyColumns} />
+                            <DataTable data={filteredCurrencies} columns={currencyColumns} hideSearch={true} />
                         )}
 
                         {activeTab === 'payment_terms' && (
-                            <DataTable data={filteredPaymentTerms} columns={paymentTermColumns} />
+                            <DataTable data={filteredPaymentTerms} columns={paymentTermColumns} hideSearch={true} />
                         )}
                     </div>
                 </div>

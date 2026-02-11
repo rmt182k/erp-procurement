@@ -29,6 +29,7 @@ interface DataTableProps<T> {
     emptyMessage?: string;
     onRowClick?: (item: T) => void;
     headerExtra?: React.ReactNode;
+    hideSearch?: boolean;
 }
 
 function cls(...inputs: any[]) {
@@ -45,7 +46,8 @@ export function DataTable<T extends { id: string | number }>({
     className,
     emptyMessage = "Tidak ada data yang ditemukan.",
     onRowClick,
-    headerExtra
+    headerExtra,
+    hideSearch = false
 }: DataTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: keyof T; order: 'asc' | 'desc' } | null>(
@@ -117,16 +119,18 @@ export function DataTable<T extends { id: string | number }>({
         <div className={cls("space-y-4", className)}>
             {/* Header Controls: Search, Extra Filters, Page Size */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="relative group flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
-                    <input
-                        type="text"
-                        placeholder={searchPlaceholder}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+                {!hideSearch && (
+                    <div className="relative group flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder={searchPlaceholder}
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                )}
 
                 <div className="flex flex-wrap items-center gap-3 justify-end">
                     {headerExtra && (
