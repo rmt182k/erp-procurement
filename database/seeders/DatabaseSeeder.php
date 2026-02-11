@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RBACSeeder::class,
+            ProcurementTypeSeeder::class,
             MasterDataSeeder::class,
             GLAccountSeeder::class,
             UserSeeder::class,

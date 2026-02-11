@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     // Security & Approval Routes
     Route::resource('roles', \App\Http\Controllers\RoleController::class);
     Route::resource('approval-rules', \App\Http\Controllers\ApprovalRuleController::class);
+    Route::resource('procurement-types', \App\Http\Controllers\ProcurementTypeController::class);
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

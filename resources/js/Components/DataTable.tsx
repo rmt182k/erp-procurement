@@ -11,8 +11,10 @@ import {
 export interface Column<T> {
     header: string;
     key?: keyof T;
+    accessorKey?: string; // Support for nested or just alternative key name
     sortable?: boolean;
     render?: (item: T) => React.ReactNode;
+    cell?: (props: { row: { original: T } }) => React.ReactNode; // Support for 'cell' style renderers
     className?: string;
     headerClassName?: string;
     align?: 'left' | 'center' | 'right';
@@ -28,6 +30,8 @@ interface DataTableProps<T> {
     className?: string;
     emptyMessage?: string;
     onRowClick?: (item: T) => void;
+    onEdit?: (item: T) => void;
+    onDelete?: (item: T) => void;
     headerExtra?: React.ReactNode;
     hideSearch?: boolean;
 }
@@ -46,6 +50,8 @@ export function DataTable<T extends { id: string | number }>({
     className,
     emptyMessage = "Tidak ada data yang ditemukan.",
     onRowClick,
+    onEdit,
+    onDelete,
     headerExtra,
     hideSearch = false
 }: DataTableProps<T>) {
@@ -63,7 +69,7 @@ export function DataTable<T extends { id: string | number }>({
         const lowerSearch = searchTerm.toLowerCase();
         return data.filter(item => {
             // If searchKeys provided, search in them. Otherwise search in all sortable columns or just all keys.
-            const keysToSearch = searchKeys || columns.filter(c => c.key).map(c => c.key as keyof T);
+            const keysToSearch = (searchKeys || columns.filter(c => c.key || c.accessorKey).map(c => (c.key || c.accessorKey) as keyof T));
 
             return keysToSearch.some(key => {
                 const value = item[key];
@@ -165,31 +171,31 @@ export function DataTable<T extends { id: string | number }>({
                                     key={idx}
                                     className={cls(
                                         "px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider transition-colors",
-                                        column.sortable && "cursor-pointer hover:bg-gray-100 group",
+                                        column.sortable && (column.key || column.accessorKey) && "cursor-pointer hover:bg-gray-100 group",
                                         column.align === 'center' ? "text-center" : column.align === 'right' ? "text-right" : "text-left",
                                         column.headerClassName
                                     )}
-                                    onClick={() => column.sortable && column.key && handleSort(column.key)}
+                                    onClick={() => column.sortable && (column.key || column.accessorKey) && handleSort((column.key || column.accessorKey) as keyof T)}
                                 >
                                     <div className={cls(
                                         "flex items-center gap-2",
                                         column.align === 'center' ? "justify-center" : column.align === 'right' ? "justify-end" : "justify-start"
                                     )}>
                                         {column.header}
-                                        {column.sortable && column.key && (
+                                        {column.sortable && (column.key || column.accessorKey) && (
                                             <div className="flex flex-col">
                                                 <ChevronUp
                                                     size={12}
                                                     className={cls(
                                                         "transition-opacity",
-                                                        sortConfig?.key === column.key && sortConfig.order === 'asc' ? "text-indigo-600 opacity-100" : "opacity-20"
+                                                        (sortConfig?.key === column.key || sortConfig?.key === column.accessorKey) && sortConfig?.order === 'asc' ? "text-indigo-600 opacity-100" : "opacity-20"
                                                     )}
                                                 />
                                                 <ChevronDown
                                                     size={12}
                                                     className={cls(
                                                         "-mt-1 transition-opacity",
-                                                        sortConfig?.key === column.key && sortConfig.order === 'desc' ? "text-indigo-600 opacity-100" : "opacity-20"
+                                                        (sortConfig?.key === column.key || sortConfig?.key === column.accessorKey) && sortConfig?.order === 'desc' ? "text-indigo-600 opacity-100" : "opacity-20"
                                                     )}
                                                 />
                                             </div>
@@ -197,6 +203,11 @@ export function DataTable<T extends { id: string | number }>({
                                     </div>
                                 </th>
                             ))}
+                            {(onEdit || onDelete) && (
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
+                                    Aksi
+                                </th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -219,14 +230,36 @@ export function DataTable<T extends { id: string | number }>({
                                                 column.className
                                             )}
                                         >
-                                            {column.render ? column.render(item) : (item[column.key!] as unknown as React.ReactNode)}
+                                            {column.cell ? column.cell({ row: { original: item } }) :
+                                                column.render ? column.render(item) :
+                                                    (item[(column.key || column.accessorKey) as keyof T] as unknown as React.ReactNode)}
                                         </td>
                                     ))}
+                                    {(onEdit || onDelete) && (
+                                        <td className="px-6 py-4 text-sm text-right space-x-2">
+                                            {onEdit && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onEdit(item); }}
+                                                    className="text-indigo-600 hover:text-indigo-900 font-medium"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            {onDelete && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); if (confirm('Yakin ingin menghapus?')) onDelete(item); }}
+                                                    className="text-red-600 hover:text-red-900 font-medium"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            )}
+                                        </td>
+                                    )}
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className="px-6 py-16 text-center">
+                                <td colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                                         <SearchX className="w-8 h-8 opacity-20" />
                                         <span className="italic text-sm">{emptyMessage}</span>
