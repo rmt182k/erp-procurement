@@ -110,6 +110,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('approval-rules', \App\Http\Controllers\ApprovalRuleController::class);
     Route::resource('procurement-types', \App\Http\Controllers\ProcurementTypeController::class);
 
+    // Procurement Management
+    Route::resource('purchase-requisitions', \App\Http\Controllers\PurchaseRequisitionController::class);
+    Route::post('purchase-requisitions/{purchase_requisition}/submit', [\App\Http\Controllers\PurchaseRequisitionController::class, 'submit'])->name('purchase-requisitions.submit');
+    Route::post('purchase-requisitions/{purchase_requisition}/cancel', [\App\Http\Controllers\PurchaseRequisitionController::class, 'cancel'])->name('purchase-requisitions.cancel');
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
