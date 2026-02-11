@@ -11,6 +11,9 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\VendorPaymentTermController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -89,6 +92,11 @@ Route::middleware('auth')->group(function () {
     Route::post('item-units', [ItemController::class, 'storeUnit'])->name('items.units.store');
     Route::put('item-units/{unit}', [ItemController::class, 'updateUnit'])->name('items.units.update');
     Route::delete('item-units/{unit}', [ItemController::class, 'destroyUnit'])->name('items.units.destroy');
+
+    // Vendor Management Routes
+    Route::resource('vendors', VendorController::class);
+    Route::resource('currencies', CurrencyController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('vendor-payment-terms', VendorPaymentTermController::class)->only(['store', 'update', 'destroy']);
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
