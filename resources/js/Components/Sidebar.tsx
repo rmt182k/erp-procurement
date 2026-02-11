@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import SidebarLink from '@/Components/SidebarLink';
-import { LayoutDashboard, Network, Package, Building2, Coins } from 'lucide-react';
+import { LayoutDashboard, Network, Package, Building2, Coins, PieChart } from 'lucide-react';
 import { useTrans } from '@/hooks/useTrans';
 
 interface SidebarProps {
@@ -77,6 +77,29 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         icon={<Coins size={20} />}
                     >
                         {trans('Chart of Accounts')}
+                    </SidebarLink>
+
+                    {/* Budgeting Section */}
+                    <div className={`mt-6 mb-2 px-4 transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{trans('Budgeting')}</span>
+                    </div>
+
+                    <SidebarLink
+                        href={route('cost-centers.index')}
+                        active={route().current('cost-centers.*')}
+                        isOpen={isOpen}
+                        icon={<Network size={20} />}
+                    >
+                        {trans('Cost Centers')}
+                    </SidebarLink>
+
+                    <SidebarLink
+                        href={route('budgets.index')}
+                        active={route().current('budgets.*')}
+                        isOpen={isOpen}
+                        icon={<PieChart size={20} />}
+                    >
+                        {trans('Budgets')}
                     </SidebarLink>
 
                     {/* Add more links here later */}

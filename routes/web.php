@@ -100,6 +100,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('vendor-payment-terms', VendorPaymentTermController::class)->only(['store', 'update', 'destroy']);
     Route::resource('chart-of-accounts', GLAccountController::class);
 
+    // Budgeting & Cost Control Routes
+    Route::resource('cost-centers', \App\Http\Controllers\CostCenterController::class);
+    Route::resource('budgets', \App\Http\Controllers\BudgetController::class);
+    Route::get('api/budgets/check', [\App\Http\Controllers\BudgetController::class, 'check'])->name('budgets.check');
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
