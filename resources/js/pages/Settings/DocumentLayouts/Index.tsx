@@ -196,29 +196,53 @@ export default function Index({ templates }: Props) {
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-4 gap-3">
                                 <div>
-                                    <InputLabel value={trans('Top Margin')} className="text-[11px] text-gray-500" />
+                                    <InputLabel value={trans('Top')} className="text-[10px] text-gray-500 uppercase font-black" />
                                     <div className="relative">
                                         <TextInput
                                             type="number"
-                                            className="mt-1 block w-full pl-8"
+                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
                                             value={data.margin_top}
                                             onChange={(e) => setData('margin_top', parseInt(e.target.value) || 0)}
                                         />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">MM</span>
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">T</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <InputLabel value={trans('Bottom Margin')} className="text-[11px] text-gray-500" />
+                                    <InputLabel value={trans('Bottom')} className="text-[10px] text-gray-500 uppercase font-black" />
                                     <div className="relative">
                                         <TextInput
                                             type="number"
-                                            className="mt-1 block w-full pl-8"
+                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
                                             value={data.margin_bottom}
                                             onChange={(e) => setData('margin_bottom', parseInt(e.target.value) || 0)}
                                         />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">MM</span>
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">B</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <InputLabel value={trans('Left')} className="text-[10px] text-gray-500 uppercase font-black" />
+                                    <div className="relative">
+                                        <TextInput
+                                            type="number"
+                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                            value={data.margin_left}
+                                            onChange={(e) => setData('margin_left', parseInt(e.target.value) || 0)}
+                                        />
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">L</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <InputLabel value={trans('Right')} className="text-[10px] text-gray-500 uppercase font-black" />
+                                    <div className="relative">
+                                        <TextInput
+                                            type="number"
+                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                            value={data.margin_right}
+                                            onChange={(e) => setData('margin_right', parseInt(e.target.value) || 0)}
+                                        />
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">R</span>
                                     </div>
                                 </div>
                             </div>
@@ -294,10 +318,12 @@ export default function Index({ templates }: Props) {
 
                                 {/* 2. Main Content Area */}
                                 <div
-                                    className="px-12 transition-all duration-300"
+                                    className="transition-all duration-300"
                                     style={{
-                                        marginTop: `${data.margin_top}mm`,
-                                        marginBottom: `${data.margin_bottom}mm`
+                                        paddingTop: `${data.margin_top}mm`,
+                                        paddingBottom: `${data.margin_bottom}mm`,
+                                        paddingLeft: `${data.margin_left}mm`,
+                                        paddingRight: `${data.margin_right}mm`
                                     }}
                                 >
                                     <div className="py-12 border-t border-gray-100">
@@ -371,9 +397,17 @@ export default function Index({ templates }: Props) {
                                     </div>
 
                                     {/* Margin Guide Overlay */}
-                                    <div className="absolute inset-0 bg-red-500/5 flex items-center justify-center border-t-[1px] border-dashed border-red-400 opacity-50 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute inset-x-0 bottom-0 bg-red-500/5 flex items-center justify-center border-t-[1px] border-dashed border-red-400 opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ height: `${data.margin_bottom}mm` }}>
                                         <div className="bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">Footer Safe Zone: {data.margin_bottom}mm</div>
                                     </div>
+                                </div>
+
+                                {/* Side Margin Guides */}
+                                <div className="absolute inset-y-0 left-0 bg-indigo-500/5 flex items-center justify-center border-r-[1px] border-dashed border-indigo-200 opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ width: `${data.margin_left}mm` }}>
+                                    <div className="rotate-90 text-[8px] font-black text-indigo-400 whitespace-nowrap">LEFT: {data.margin_left}mm</div>
+                                </div>
+                                <div className="absolute inset-y-0 right-0 bg-indigo-500/5 flex items-center justify-center border-l-[1px] border-dashed border-indigo-200 opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ width: `${data.margin_right}mm` }}>
+                                    <div className="-rotate-90 text-[8px] font-black text-indigo-400 whitespace-nowrap">RIGHT: {data.margin_right}mm</div>
                                 </div>
                             </div>
                         </div>
