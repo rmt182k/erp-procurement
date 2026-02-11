@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Role;
+use App\Models\Permission;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class RoleController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('Roles/Index', [
+            'roles' => Role::with('permissions')->get(),
+            'permissions' => Permission::all(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:roles,name',
+            'label' => 'required|string',
+            'permissions' => 'array',
+        ]);
+
+        $role = Role::create([
+            'name' => $validated['name'],
+            'label' => $validated['label'],
+        ]);
+
+        if (isset($validated['permissions'])) {
+            $role->permissions()->sync($validated['permissions']);
+        }
+
+        return back()->with('success', 'Role created successfully.');
+    }
+
+    public function update(Request $request, Role $role)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:roles,name,' . $role->id,
+            'label' => 'required|string',
+            'permissions' => 'array',
+        ]);
+
+        $role->update([
+            'name' => $validated['name'],
+            'label' => $validated['label'],
+        ]);
+
+        $role->permissions()->sync($validated['permissions'] ?? []);
+
+        return back()->with('success', 'Role updated successfully.');
+    }
+
+    public function destroy(Role $role)
+    {
+        if ($role->users()->exists()) {
+            return back()->with('error', 'Cannot delete role assigned to users.');
+        }
+
+        $role->delete();
+        return back()->with('success', 'Role deleted successfully.');
+    }
+}

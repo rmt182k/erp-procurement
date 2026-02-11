@@ -105,6 +105,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('budgets', \App\Http\Controllers\BudgetController::class);
     Route::get('api/budgets/check', [\App\Http\Controllers\BudgetController::class, 'check'])->name('budgets.check');
 
+    // Security & Approval Routes
+    Route::resource('roles', \App\Http\Controllers\RoleController::class);
+    Route::resource('approval-rules', \App\Http\Controllers\ApprovalRuleController::class);
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
