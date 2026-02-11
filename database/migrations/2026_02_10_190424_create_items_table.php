@@ -21,6 +21,8 @@ return new class extends Migration
             $table->decimal('stock', 15, 2)->default(0);
             $table->text('description')->nullable();
             $table->string('status')->default('active'); // active, inactive
+            $table->foreignId('inventory_account_id')->nullable()->constrained('gl_accounts')->onDelete('set null');
+            $table->foreignId('expense_account_id')->nullable()->constrained('gl_accounts')->onDelete('set null');
             $table->timestamps();
         });
     }

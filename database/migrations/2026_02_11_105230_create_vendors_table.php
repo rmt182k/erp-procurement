@@ -29,8 +29,8 @@ return new class extends Migration
             // Financial Profile
             $table->string('tax_id')->nullable(); // NPWP
             $table->boolean('is_pkp')->default(false);
-            $table->string('currency_code', 3)->default('IDR');
-            $table->integer('payment_term_days')->default(0); // 0 = COD/Cash, 30 = Net 30, etc.
+            $table->foreignId('currency_id')->nullable()->constrained('currencies')->onDelete('set null');
+            $table->foreignId('payment_term_id')->nullable()->constrained('vendor_payment_terms')->onDelete('set null');
 
             // Bank Details
             $table->string('bank_name')->nullable();

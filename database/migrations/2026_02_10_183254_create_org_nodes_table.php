@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('org_nodes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('parent_id')->nullable();
+            $table->string('code')->unique();
+            $table->string('name');
             $table->string('type');
-            $table->string('label');
             $table->boolean('is_expanded')->default(true);
             $table->json('meta')->nullable();
             $table->integer('sort_order')->default(0);
