@@ -295,15 +295,17 @@ export default function Index({ templates }: Props) {
                                     )}
 
                                     {data.template_mode === 'Blade' && (
-                                        <div className="flex-1 flex flex-col justify-center px-12 border-b-2 border-indigo-500 shadow-sm bg-gradient-to-r from-indigo-50/20 to-transparent">
-                                            <div className="flex justify-between items-start">
-                                                <div className="space-y-1">
-                                                    <div className="h-8 w-40 bg-indigo-700 rounded-md shadow-sm"></div>
+                                        <div className={`flex-1 flex flex-col justify-center px-12 transition-all duration-500 ${data.view_name === 'modern' ? 'border-b-4 border-indigo-600 bg-gradient-to-r from-indigo-50/30 to-transparent' : data.view_name === 'classic' ? 'border-b-2 border-gray-800 bg-gray-50/50' : 'border-b-[1px] border-gray-200 bg-white'}`}>
+                                            <div className={`flex justify-between items-start ${data.view_name === 'classic' ? 'flex-col items-center text-center gap-4' : ''}`}>
+                                                <div className={`space-y-1 ${data.view_name === 'classic' ? 'order-2' : ''}`}>
+                                                    <div className={`h-8 rounded-md shadow-sm transition-all ${data.view_name === 'modern' ? 'w-40 bg-indigo-700' : data.view_name === 'classic' ? 'w-56 bg-gray-800' : 'w-32 bg-gray-400'}`}></div>
                                                     <div className="h-3 w-32 bg-gray-200 rounded"></div>
                                                     <div className="h-3 w-28 bg-gray-100 rounded"></div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-black text-indigo-900 uppercase">{activeTab === 'PO' ? 'Purchase Order' : activeTab === 'PR' ? 'Purchase Requisition' : 'Invoice'}</div>
+                                                <div className={`${data.view_name === 'classic' ? 'order-1 w-full border-b border-gray-200 pb-2 mb-2' : 'text-right'}`}>
+                                                    <div className={`font-black uppercase tracking-tighter transition-all ${data.view_name === 'modern' ? 'text-2xl text-indigo-900' : data.view_name === 'classic' ? 'text-3xl text-gray-900 font-serif' : 'text-xl text-gray-600'}`}>
+                                                        {activeTab === 'PO' ? 'Purchase Order' : activeTab === 'PR' ? 'Purchase Requisition' : 'Invoice'}
+                                                    </div>
                                                     <div className="text-xs font-mono text-gray-400 mt-1">DOC NO: {activeTab === 'PO' ? 'PO' : activeTab === 'PR' ? 'PR' : 'INV'}/2026/0001</div>
                                                 </div>
                                             </div>
