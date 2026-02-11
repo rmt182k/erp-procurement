@@ -30,9 +30,19 @@ class PdfService
             ]
         ];
 
-        // 3. Render the PDF using a master layout that injects the branding
+        // 3. Resolve View Name
+        // If mode is Blade, we try to use the specific preset chosen in the template settings
+        $finalView = $viewName;
+        if ($branding['mode'] === 'Blade' && $template && $template->view_name) {
+            // viewName comes in as 'pdf.po.modern'. We want to swap 'modern' with the user's choice.
+            $parts = explode('.', $viewName);
+            array_pop($parts); // Remove the last part (e.g., 'modern')
+            $finalView = implode('.', $parts) . '.' . $template->view_name;
+        }
+
+        // 4. Render the PDF using a master layout that injects the branding
         return Pdf::loadView('pdf.master_layout', [
-            'content_view' => $viewName,
+            'content_view' => $finalView,
             'data' => $data,
             'branding' => $branding,
         ]);
