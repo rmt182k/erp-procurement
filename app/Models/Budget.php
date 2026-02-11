@@ -14,13 +14,15 @@ class Budget extends Model
         'gl_account_id',
         'fiscal_year',
         'amount_allocated',
-        'amount_reserved',
+        'amount_pending',
+        'amount_committed',
         'amount_used',
     ];
 
     protected $casts = [
         'amount_allocated' => 'decimal:2',
-        'amount_reserved' => 'decimal:2',
+        'amount_pending' => 'decimal:2',
+        'amount_committed' => 'decimal:2',
         'amount_used' => 'decimal:2',
     ];
 
@@ -39,6 +41,6 @@ class Budget extends Model
      */
     public function getAmountRemainingAttribute()
     {
-        return $this->amount_allocated - ($this->amount_reserved + $this->amount_used);
+        return $this->amount_allocated - ($this->amount_pending + $this->amount_committed + $this->amount_used);
     }
 }

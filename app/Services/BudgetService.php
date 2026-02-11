@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Budget;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseRequisition;
 use App\Models\PurchaseRequisitionItem;
 use Illuminate\Support\Facades\DB;
@@ -84,5 +85,40 @@ class BudgetService
                 $budget->decrement('amount_pending', $item->subtotal);
             }
         }
+    }
+
+    /**
+     * Commit budget (Move from pending to committed).
+     */
+    public function commit(PurchaseOrder $po)
+    {
+        $year = $po->order_date->year;
+
+        foreach ($po->items as $item) {
+            $glAccountId = $item->item->expense_account_id;
+
+            $budget = Budget::where('cost_center_id', $po->cost_center_id)
+                ->where('gl_account_id', $glAccountId)
+                ->where('fiscal_year', $year)
+                ->first();
+
+            if ($budget) {
+                // If this PO item came from a PR item, we should have released the pending amount already or we do it here.
+                // In POService::approve, we will call release(PR) then commit(PO).
+
+                // Convert to base currency for budget tracking
+                $baseAmount = $item->total_price * $po->exchange_rate;
+                $budget->increment('amount_committed', $baseAmount);
+            }
+        }
+    }
+
+    /**
+     * Release committed budget (Decrease amount_committed, increase amount_used).
+     * Used when Invoice/Payment is made (for future use).
+     */
+    public function realize(PurchaseOrder $po, $amount)
+    {
+        // Placeholder for realisasi invoice
     }
 }

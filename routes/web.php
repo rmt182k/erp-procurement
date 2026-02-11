@@ -14,6 +14,8 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Settings\CurrencyController;
 use App\Http\Controllers\Settings\ExchangeRateController;
+use App\Http\Controllers\Settings\DocumentTemplateController;
+use App\Http\Controllers\Procurement\PurchaseOrderController;
 use App\Http\Controllers\VendorPaymentTermController;
 use App\Http\Controllers\GLAccountController;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +120,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('purchase-requisitions', \App\Http\Controllers\PurchaseRequisitionController::class);
     Route::post('purchase-requisitions/{purchase_requisition}/submit', [\App\Http\Controllers\PurchaseRequisitionController::class, 'submit'])->name('purchase-requisitions.submit');
     Route::post('purchase-requisitions/{purchase_requisition}/cancel', [\App\Http\Controllers\PurchaseRequisitionController::class, 'cancel'])->name('purchase-requisitions.cancel');
+
+    // Purchase Order Management
+    Route::resource('purchase-orders', PurchaseOrderController::class);
+    Route::post('purchase-orders/convert/{pr}', [PurchaseOrderController::class, 'convertFromPR'])->name('purchase-orders.convert');
+    // Renamed approve route to distinguish from PR approval if needed, using custom method.
+    Route::post('purchase-orders/{purchase_order}/approve', [PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
+    Route::get('purchase-orders/{purchase_order}/print', [PurchaseOrderController::class, 'print'])->name('purchase-orders.print');
+
+    // Document Layouts Management
+    Route::get('document-templates', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
+    Route::post('document-templates/{docType}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

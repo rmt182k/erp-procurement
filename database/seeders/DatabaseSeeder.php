@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             RBACSeeder::class,
             ProcurementTypeSeeder::class,
-            MasterDataSeeder::class,
             GLAccountSeeder::class,
+            MasterDataSeeder::class,
             ItemModuleSeeder::class,
         ]);
     }

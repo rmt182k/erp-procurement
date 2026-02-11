@@ -70,7 +70,8 @@ class MasterDataSeeder extends Seeder
                 'fiscal_year' => 2026,
             ], [
                 'amount_allocated' => 500000000, // 500 million
-                'amount_reserved' => 0,
+                'amount_pending' => 0,
+                'amount_committed' => 0,
                 'amount_used' => 0,
             ]);
         }
