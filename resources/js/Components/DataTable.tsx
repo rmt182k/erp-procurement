@@ -7,6 +7,7 @@ import {
     ChevronRight,
     SearchX
 } from 'lucide-react';
+import { useTrans } from '@/hooks/useTrans';
 
 export interface Column<T> {
     header: string;
@@ -48,19 +49,23 @@ export function DataTable<T extends { id: string | number }>({
     itemsPerPage = 10,
     initialSort,
     className,
-    emptyMessage = "Tidak ada data yang ditemukan.",
+    emptyMessage,
     onRowClick,
     onEdit,
     onDelete,
     headerExtra,
     hideSearch = false
 }: DataTableProps<T>) {
+    const { trans } = useTrans();
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: keyof T; order: 'asc' | 'desc' } | null>(
         initialSort || null
     );
     const [pageSize, setPageSize] = useState(itemsPerPage);
     const [currentPage, setCurrentPage] = useState(1);
+
+    const actualSearchPlaceholder = searchPlaceholder || trans('Search data...');
+    const actualEmptyMessage = emptyMessage || trans('No data found.');
 
     // 1. Filtering Logic
     const filteredData = useMemo(() => {
@@ -130,7 +135,7 @@ export function DataTable<T extends { id: string | number }>({
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
                         <input
                             type="text"
-                            placeholder={searchPlaceholder}
+                            placeholder={actualSearchPlaceholder}
                             className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -146,7 +151,7 @@ export function DataTable<T extends { id: string | number }>({
                     )}
 
                     <div className="flex items-center gap-2 text-xs font-medium text-gray-400 bg-gray-50/50 border border-gray-100 px-3 py-1.5 rounded-lg">
-                        <span className="uppercase tracking-wider">Tampilkan</span>
+                        <span className="uppercase tracking-wider">{trans('Show')}</span>
                         <select
                             className="bg-transparent border-none py-0 pl-1 pr-6 focus:ring-0 text-sm font-bold text-indigo-600 cursor-pointer"
                             value={pageSize}
@@ -156,7 +161,7 @@ export function DataTable<T extends { id: string | number }>({
                                 <option key={size} value={size}>{size}</option>
                             ))}
                         </select>
-                        <span className="uppercase tracking-wider">Baris</span>
+                        <span className="uppercase tracking-wider">{trans('Rows')}</span>
                     </div>
                 </div>
             </div>
@@ -205,7 +210,7 @@ export function DataTable<T extends { id: string | number }>({
                             ))}
                             {(onEdit || onDelete) && (
                                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
-                                    Aksi
+                                    {trans('Action')}
                                 </th>
                             )}
                         </tr>
@@ -242,15 +247,15 @@ export function DataTable<T extends { id: string | number }>({
                                                     onClick={(e) => { e.stopPropagation(); onEdit(item); }}
                                                     className="text-indigo-600 hover:text-indigo-900 font-medium"
                                                 >
-                                                    Edit
+                                                    {trans('Edit')}
                                                 </button>
                                             )}
                                             {onDelete && (
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); if (confirm('Yakin ingin menghapus?')) onDelete(item); }}
+                                                    onClick={(e) => { e.stopPropagation(); if (confirm(trans('Are you sure you want to delete this?'))) onDelete(item); }}
                                                     className="text-red-600 hover:text-red-900 font-medium"
                                                 >
-                                                    Hapus
+                                                    {trans('Delete')}
                                                 </button>
                                             )}
                                         </td>
@@ -262,7 +267,7 @@ export function DataTable<T extends { id: string | number }>({
                                 <td colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-gray-400">
                                         <SearchX className="w-8 h-8 opacity-20" />
-                                        <span className="italic text-sm">{emptyMessage}</span>
+                                        <span className="italic text-sm">{actualEmptyMessage}</span>
                                     </div>
                                 </td>
                             </tr>
@@ -274,7 +279,7 @@ export function DataTable<T extends { id: string | number }>({
             {/* Pagination UI */}
             <div className="flex items-center justify-between pt-2">
                 <div className="text-xs font-medium text-gray-500">
-                    Menampilkan <span className="text-gray-900 font-bold">{filteredData.length > 0 ? ((currentPage - 1) * pageSize) + 1 : 0}</span> - <span className="text-gray-900 font-bold">{Math.min(currentPage * pageSize, filteredData.length)}</span> dari <span className="text-gray-900 font-bold">{filteredData.length}</span> data
+                    {trans('Showing')} <span className="text-gray-900 font-bold">{filteredData.length > 0 ? ((currentPage - 1) * pageSize) + 1 : 0}</span> - <span className="text-gray-900 font-bold">{Math.min(currentPage * pageSize, filteredData.length)}</span> {trans('of')} <span className="text-gray-900 font-bold">{filteredData.length}</span> {trans('data')}
                 </div>
                 {totalPages > 1 && (
                     <div className="flex items-center gap-1.5">

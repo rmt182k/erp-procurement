@@ -84,7 +84,7 @@ export default function Show({ requisition }: Props) {
                     {/* Actions Bar */}
                     <div className="flex justify-between items-center bg-white p-4 shadow sm:rounded-lg">
                         <Link href={route('purchase-requisitions.index')} className="text-gray-500 hover:text-gray-700 flex items-center gap-1 text-sm">
-                            <ArrowLeft size={16} /> Kembali ke Daftar
+                            <ArrowLeft size={16} /> {trans('Back to List')}
                         </Link>
 
                         <div className="flex gap-3">
@@ -94,7 +94,7 @@ export default function Show({ requisition }: Props) {
                                     disabled={submitting}
                                     className="bg-indigo-600 hover:bg-indigo-700"
                                 >
-                                    <Send size={16} className="mr-2" /> Ajukan Approval
+                                    <Send size={16} className="mr-2" /> {trans('Submit for Approval')}
                                 </PrimaryButton>
                             )}
 
@@ -103,7 +103,7 @@ export default function Show({ requisition }: Props) {
                                     onClick={() => setShowCancelModal(true)}
                                     className="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-md font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition duration-150"
                                 >
-                                    <Ban size={16} className="mr-2" /> Batalkan PR
+                                    <Ban size={16} className="mr-2" /> {trans('Cancel PR')}
                                 </button>
                             )}
                         </div>
@@ -116,55 +116,55 @@ export default function Show({ requisition }: Props) {
                             <div className="bg-white shadow sm:rounded-lg p-6">
                                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
                                     <FileText className="text-indigo-600" size={20} />
-                                    Informasi Utama
+                                    {trans('Main Information')}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                                     <div>
-                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">No. Dokumen</p>
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{trans('Document No.')}</p>
                                         <p className="font-bold text-lg">{requisition.doc_number}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Status</p>
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{trans('Status')}</p>
                                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mt-1 ${requisition.status === 'DRAFT' ? 'bg-gray-100 text-gray-600' :
-                                                requisition.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-600' :
-                                                    requisition.status === 'APPROVED' ? 'bg-green-100 text-green-600' :
-                                                        requisition.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
-                                                            'bg-purple-100 text-purple-600'
+                                            requisition.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-600' :
+                                                requisition.status === 'APPROVED' ? 'bg-green-100 text-green-600' :
+                                                    requisition.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
+                                                        'bg-purple-100 text-purple-600'
                                             }`}>
                                             {requisition.status}
                                         </span>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-400 uppercase tracking-widest font-bold flex items-center gap-1">
-                                            <User size={12} /> Pembuat
+                                            <User size={12} /> {trans('Requester')}
                                         </p>
                                         <p className="font-medium">{requisition.requester.name}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-gray-400 uppercase tracking-widest font-bold flex items-center justify-end gap-1">
-                                            <Calendar size={12} /> Tgl. Dibutuhkan
+                                            <Calendar size={12} /> {trans('Required Date')}
                                         </p>
                                         <p className="font-medium">{new Date(requisition.required_date).toLocaleDateString('id-ID', { dateStyle: 'long' })}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-400 uppercase tracking-widest font-bold flex items-center gap-1">
-                                            <Building2 size={12} /> Cost Center
+                                            <Building2 size={12} /> {trans('Cost Center')}
                                         </p>
                                         <p className="font-medium">{requisition.cost_center.name}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Tipe Pengadaan</p>
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{trans('Procurement Type')}</p>
                                         <p className="font-medium text-indigo-600 font-bold">{requisition.procurement_type.name}</p>
                                     </div>
                                     <div className="col-span-2 pt-4 border-t border-gray-100">
-                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Justifikasi / Deskripsi</p>
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">{trans('Description / Justification')}</p>
                                         <p className="text-sm bg-gray-50 p-4 rounded-lg italic whitespaces-pre-line text-gray-600 border border-gray-100">
                                             "{requisition.description}"
                                         </p>
                                     </div>
                                     {requisition.cancel_reason && (
                                         <div className="col-span-2 bg-red-50 border border-red-100 p-4 rounded-lg">
-                                            <p className="text-xs text-red-400 uppercase tracking-widest font-bold mb-1">Alasan Pembatalan</p>
+                                            <p className="text-xs text-red-400 uppercase tracking-widest font-bold mb-1">{trans('Cancellation Reason')}</p>
                                             <p className="text-sm text-red-700">{requisition.cancel_reason}</p>
                                         </div>
                                     )}
@@ -174,16 +174,16 @@ export default function Show({ requisition }: Props) {
                             {/* Items List */}
                             <div className="bg-white shadow sm:rounded-lg overflow-hidden">
                                 <div className="p-6 border-b border-gray-100">
-                                    <h3 className="text-lg font-bold">Daftar Barang / Jasa</h3>
+                                    <h3 className="text-lg font-bold">{trans('Items / Services List')}</h3>
                                 </div>
                                 <table className="w-full text-left">
                                     <thead className="bg-gray-50 uppercase text-[10px] font-bold text-gray-500 tracking-widest">
                                         <tr>
-                                            <th className="px-6 py-4">Item</th>
-                                            <th className="px-6 py-4 w-24">Unit</th>
-                                            <th className="px-6 py-4 w-24 text-center">Qty</th>
-                                            <th className="px-6 py-4 text-right">Est. Harga</th>
-                                            <th className="px-6 py-4 text-right">Subtotal</th>
+                                            <th className="px-6 py-4">{trans('Item')}</th>
+                                            <th className="px-6 py-4 w-24">{trans('Unit')}</th>
+                                            <th className="px-6 py-4 w-24 text-center">{trans('Qty')}</th>
+                                            <th className="px-6 py-4 text-right">{trans('Est. Price')}</th>
+                                            <th className="px-6 py-4 text-right">{trans('Subtotal')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -207,7 +207,7 @@ export default function Show({ requisition }: Props) {
                                     </tbody>
                                     <tfoot className="bg-gray-50 font-bold">
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-4 text-right text-xs uppercase text-gray-400 tracking-widest">Total Estimasi PR</td>
+                                            <td colSpan={4} className="px-6 py-4 text-right text-xs uppercase text-gray-400 tracking-widest">{trans('Total Estimated PR')}</td>
                                             <td className="px-6 py-4 text-right text-indigo-600 text-lg">
                                                 {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(requisition.total_estimated_amount)}
                                             </td>
@@ -222,22 +222,22 @@ export default function Show({ requisition }: Props) {
                             <div className="bg-white shadow sm:rounded-lg p-6">
                                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
                                     <Clock className="text-indigo-600" size={20} />
-                                    Approval Timeline
+                                    {trans('Approval Timeline')}
                                 </h3>
 
                                 <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100">
                                     {requisition.approvals.length === 0 ? (
                                         <div className="flex items-center gap-3 text-gray-400 bg-gray-50 p-4 rounded-lg">
                                             <AlertCircle size={20} className="opacity-50" />
-                                            <p className="text-sm italic">Approval belum di-init. Ajukan PR terlebih dahulu.</p>
+                                            <p className="text-sm italic">{trans('Approval not initiated. Submit PR first.')}</p>
                                         </div>
                                     ) : (
                                         requisition.approvals.sort((a, b) => (BigInt(a.id) > BigInt(b.id) ? 1 : -1)).map((approval, idx) => (
                                             <div key={approval.id} className="relative pl-8">
                                                 <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 ${approval.status === 'APPROVED' ? 'bg-green-500' :
-                                                        approval.status === 'PENDING' ? 'bg-blue-500 animate-pulse' :
-                                                            approval.status === 'REJECTED' ? 'bg-red-500' :
-                                                                'bg-gray-300'
+                                                    approval.status === 'PENDING' ? 'bg-blue-500 animate-pulse' :
+                                                        approval.status === 'REJECTED' ? 'bg-red-500' :
+                                                            'bg-gray-300'
                                                     }`}>
                                                     {approval.status === 'APPROVED' ? <CheckCircle2 size={12} className="text-white" /> :
                                                         approval.status === 'REJECTED' ? <XCircle size={12} className="text-white" /> :
@@ -245,13 +245,13 @@ export default function Show({ requisition }: Props) {
                                                 </div>
 
                                                 <div>
-                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Step {idx + 1}</p>
+                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{trans('Step')} {idx + 1}</p>
                                                     <p className="font-bold text-gray-800">{approval.role_name}</p>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${approval.status === 'APPROVED' ? 'bg-green-50 text-green-600' :
-                                                                approval.status === 'PENDING' ? 'bg-blue-50 text-blue-600' :
-                                                                    approval.status === 'REJECTED' ? 'bg-red-50 text-red-600' :
-                                                                        'bg-gray-50 text-gray-400'
+                                                            approval.status === 'PENDING' ? 'bg-blue-50 text-blue-600' :
+                                                                approval.status === 'REJECTED' ? 'bg-red-50 text-red-600' :
+                                                                    'bg-gray-50 text-gray-400'
                                                             }`}>
                                                             {approval.status}
                                                         </span>
@@ -277,35 +277,34 @@ export default function Show({ requisition }: Props) {
                 </div>
             </div>
 
-            {/* Cancel Modal */}
             <Modal show={showCancelModal} onClose={() => setShowCancelModal(false)} maxWidth="md">
                 <form onSubmit={handleConfirmCancel} className="p-6">
                     <h2 className="text-lg font-bold text-gray-900 border-b pb-3 mb-4 flex items-center gap-2 text-red-600">
-                        <Ban size={20} /> Konfirmasi Pembatalan PR
+                        <Ban size={20} /> {trans('Confirm PR Cancellation')}
                     </h2>
                     <p className="text-sm text-gray-600 mb-4">
-                        Tindakan ini akan membatalkan PR ini dan **melepas kembali (release)** budget yang sudah di-lock sebelumnya. PR yang dibatalkan tidak bisa diajukan kembali.
+                        {trans('This action will cancel this PR and **release** the previously locked budget. Cancelled PRs cannot be resubmitted.')}
                     </p>
                     <div>
-                        <InputLabel value="Alasan Pembatalan" required />
+                        <InputLabel value={trans('Cancellation Reason')} required />
                         <textarea
                             className="mt-1 block w-full border-gray-300 focus:border-red-500 focus:ring-red-500 rounded-md shadow-sm"
                             rows={3}
                             value={cancelData.cancel_reason}
                             onChange={e => setCancelData('cancel_reason', e.target.value)}
-                            placeholder="Contoh: Salah input jumlah barang..."
+                            placeholder={trans('Example: Wrong item quantity input...')}
                             required
                         />
                         <InputError message={cancelErrors.cancel_reason} />
                     </div>
                     <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton onClick={() => setShowCancelModal(false)}>Tidak, Kembali</SecondaryButton>
+                        <SecondaryButton onClick={() => setShowCancelModal(false)}>{trans('No, Back')}</SecondaryButton>
                         <button
                             type="submit"
                             disabled={cancelling}
                             className="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150"
                         >
-                            Ya, Batalkan Sekarang
+                            {trans('Yes, Cancel Now')}
                         </button>
                     </div>
                 </form>
