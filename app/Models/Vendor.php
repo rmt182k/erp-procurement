@@ -18,7 +18,7 @@ class Vendor extends Model
         'country',
         'tax_id',
         'is_pkp',
-        'currency_id',
+        'currency_code',
         'payment_term_id',
         'bank_name',
         'bank_account_number',
@@ -32,7 +32,7 @@ class Vendor extends Model
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(Currency::class, 'currency_code', 'code');
     }
 
     public function paymentTerm()

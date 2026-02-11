@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import SidebarLink from '@/Components/SidebarLink';
-import { LayoutDashboard, Network, Package, Building2, Coins, PieChart, ShieldCheck, Workflow, Settings, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Network, Package, Building2, Coins, PieChart, ShieldCheck, Workflow, Settings, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useTrans } from '@/hooks/useTrans';
 
 interface SidebarProps {
@@ -151,6 +151,24 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         icon={<Settings size={20} />}
                     >
                         {trans('Procurement Types')}
+                    </SidebarLink>
+
+                    <SidebarLink
+                        href={route('currencies.index')}
+                        active={route().current('currencies.*')}
+                        isOpen={isOpen}
+                        icon={<Coins size={20} />}
+                    >
+                        {trans('Currencies')}
+                    </SidebarLink>
+
+                    <SidebarLink
+                        href={route('exchange-rates.index')}
+                        active={route().current('exchange-rates.*')}
+                        isOpen={isOpen}
+                        icon={<TrendingUp size={20} />}
+                    >
+                        {trans('Exchange Rates')}
                     </SidebarLink>
 
                     {/* Add more links here later */}

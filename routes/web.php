@@ -12,7 +12,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\VendorController;
-use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\Settings\CurrencyController;
+use App\Http\Controllers\Settings\ExchangeRateController;
 use App\Http\Controllers\VendorPaymentTermController;
 use App\Http\Controllers\GLAccountController;
 use Illuminate\Support\Facades\Route;
@@ -96,7 +97,10 @@ Route::middleware('auth')->group(function () {
 
     // Vendor Management Routes
     Route::resource('vendors', VendorController::class);
+    Route::get('currencies', [CurrencyController::class, 'index'])->name('currencies.index');
     Route::resource('currencies', CurrencyController::class)->only(['store', 'update', 'destroy']);
+    Route::get('exchange-rates', [ExchangeRateController::class, 'index'])->name('exchange-rates.index');
+    Route::resource('exchange-rates', ExchangeRateController::class)->only(['store', 'destroy']);
     Route::resource('vendor-payment-terms', VendorPaymentTermController::class)->only(['store', 'update', 'destroy']);
     Route::resource('chart-of-accounts', GLAccountController::class);
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('procurement_type_id')->constrained('procurement_types')->onDelete('restrict');
             $table->foreignId('requester_id')->constrained('users')->onDelete('restrict');
             $table->foreignId('cost_center_id')->constrained('cost_centers')->onDelete('restrict');
-            $table->foreignId('org_node_id')->nullable()->constrained('org_nodes')->onDelete('set null');
+            $table->foreignUuid('org_node_id')->nullable()->constrained('org_nodes')->onDelete('set null');
             $table->foreignId('suggested_vendor_id')->nullable()->constrained('vendors')->onDelete('set null');
 
             $table->date('required_date');
