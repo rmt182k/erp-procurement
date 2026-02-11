@@ -14,6 +14,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\VendorPaymentTermController;
+use App\Http\Controllers\GLAccountController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -97,6 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('vendors', VendorController::class);
     Route::resource('currencies', CurrencyController::class)->only(['store', 'update', 'destroy']);
     Route::resource('vendor-payment-terms', VendorPaymentTermController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('chart-of-accounts', GLAccountController::class);
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

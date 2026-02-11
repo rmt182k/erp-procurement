@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemUnit;
+use App\Models\GLAccount;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class ItemController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Item::with(['category', 'unit']);
+        $query = Item::with(['category', 'unit', 'inventoryAccount', 'expenseAccount']);
 
         // We return a larger set (up to 1000) for client-side instant search/sort/pagination
         $items = $query->latest()->get();
@@ -22,6 +23,7 @@ class ItemController extends Controller
             'items' => $items,
             'categories' => ItemCategory::all(),
             'units' => ItemUnit::all(),
+            'gl_accounts' => GLAccount::all(),
             'filters' => $request->only(['search', 'category'])
         ]);
     }
@@ -37,6 +39,8 @@ class ItemController extends Controller
             'stock' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'status' => 'required|in:active,inactive',
+            'inventory_account_id' => 'required|exists:gl_accounts,id',
+            'expense_account_id' => 'required|exists:gl_accounts,id',
         ]);
 
         Item::create($validated);
@@ -55,6 +59,8 @@ class ItemController extends Controller
             'stock' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'status' => 'required|in:active,inactive',
+            'inventory_account_id' => 'required|exists:gl_accounts,id',
+            'expense_account_id' => 'required|exists:gl_accounts,id',
         ]);
 
         $item->update($validated);

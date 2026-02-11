@@ -19,7 +19,7 @@ class VendorController extends Controller
     {
         return Inertia::render('Vendors/Index', [
             'vendors' => Vendor::with(['payableAccount', 'currency', 'paymentTerm'])->get(),
-            'gl_accounts' => GLAccount::where('type', 'payable')->get(),
+            'gl_accounts' => GLAccount::where('type', 'liability')->get(),
             'currencies' => Currency::all(),
             'payment_terms' => VendorPaymentTerm::all(),
             'filters' => request()->all(['search']),

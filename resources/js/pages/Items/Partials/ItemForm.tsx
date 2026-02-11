@@ -12,6 +12,8 @@ interface Item {
     stock: number | string;
     description: string | null;
     status: 'active' | 'inactive';
+    inventory_account_id?: number | string | null;
+    expense_account_id?: number | string | null;
 }
 
 interface Props {
@@ -20,14 +22,26 @@ interface Props {
     item?: Item | null;
     categories: { id: string; name: string }[];
     units: { id: string; name: string; abbreviation: string }[];
+    glAccounts: { id: number; name: string; code: string; type: string }[];
 }
 
 function cls(...inputs: any[]) {
     return inputs.filter(Boolean).join(' ');
 }
 
-export const ItemForm: React.FC<Props> = ({ isOpen, onClose, item, categories, units }) => {
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+export const ItemForm: React.FC<Props> = ({ isOpen, onClose, item, categories, units, glAccounts }) => {
+    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm<{
+        category_id: string;
+        unit_id: string;
+        code: string;
+        name: string;
+        price: string;
+        stock: string;
+        description: string;
+        status: 'active' | 'inactive';
+        inventory_account_id: string | number;
+        expense_account_id: string | number;
+    }>({
         category_id: '',
         unit_id: '',
         code: '',
@@ -35,7 +49,9 @@ export const ItemForm: React.FC<Props> = ({ isOpen, onClose, item, categories, u
         price: '',
         stock: '0',
         description: '',
-        status: 'active' as 'active' | 'inactive',
+        status: 'active',
+        inventory_account_id: '',
+        expense_account_id: '',
     });
 
     // Mini-form states
@@ -59,6 +75,8 @@ export const ItemForm: React.FC<Props> = ({ isOpen, onClose, item, categories, u
                 stock: item.stock.toString(),
                 description: item.description || '',
                 status: item.status,
+                inventory_account_id: item.inventory_account_id || '',
+                expense_account_id: item.expense_account_id || '',
             });
         } else {
             reset();
@@ -360,6 +378,54 @@ export const ItemForm: React.FC<Props> = ({ isOpen, onClose, item, categories, u
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
                             />
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-gray-100" />
+
+                    {/* Accounting Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1 px-2 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-md flex items-center gap-1.5">
+                                <Plus className="w-3 h-3" />
+                                ACCOUNT TAGGING
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Inventory Account (Asset)</label>
+                            <select
+                                className={cls(
+                                    "w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:ring-2 transition-all",
+                                    errors.inventory_account_id ? "border-red-300 focus:ring-red-100" : "border-gray-200 focus:ring-indigo-100 focus:border-indigo-400"
+                                )}
+                                value={data.inventory_account_id}
+                                onChange={e => setData('inventory_account_id', e.target.value)}
+                            >
+                                <option value="">Pilih Akun Persediaan</option>
+                                {glAccounts.filter(acc => acc.type === 'asset').map(acc => (
+                                    <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                                ))}
+                            </select>
+                            {errors.inventory_account_id && <p className="text-[10px] text-red-500 font-medium">{errors.inventory_account_id}</p>}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Expense Account (Beban/HPP)</label>
+                            <select
+                                className={cls(
+                                    "w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:ring-2 transition-all",
+                                    errors.expense_account_id ? "border-red-300 focus:ring-red-100" : "border-gray-200 focus:ring-indigo-100 focus:border-indigo-400"
+                                )}
+                                value={data.expense_account_id}
+                                onChange={e => setData('expense_account_id', e.target.value)}
+                            >
+                                <option value="">Pilih Akun Biaya</option>
+                                {glAccounts.filter(acc => acc.type === 'expense').map(acc => (
+                                    <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                                ))}
+                            </select>
+                            {errors.expense_account_id && <p className="text-[10px] text-red-500 font-medium">{errors.expense_account_id}</p>}
                         </div>
                     </div>
                 </form>

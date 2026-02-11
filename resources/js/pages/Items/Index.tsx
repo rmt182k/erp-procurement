@@ -31,6 +31,10 @@ interface Item {
     status: 'active' | 'inactive';
     category: { name: string };
     unit: { name: string; abbreviation: string };
+    inventory_account_id?: number | string | null;
+    expense_account_id?: number | string | null;
+    inventory_account?: { code: string; name: string };
+    expense_account?: { code: string; name: string };
 }
 
 interface ItemCategory {
@@ -49,6 +53,7 @@ interface Props {
     items: Item[];
     categories: ItemCategory[];
     units: ItemUnit[];
+    gl_accounts: { id: number; name: string; code: string; type: string }[];
     filters: { search?: string; category?: string };
 }
 
@@ -58,7 +63,7 @@ function cls(...inputs: any[]) {
 
 type TabType = 'items' | 'categories' | 'units';
 
-export default function Index({ items, categories, units, filters }: Props) {
+export default function Index({ items, categories, units, gl_accounts, filters }: Props) {
     const { trans } = useTrans();
     const [activeTab, setActiveTab] = useState<TabType>('items');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
@@ -134,6 +139,22 @@ export default function Index({ items, categories, units, filters }: Props) {
                 )}>
                     {item.status === 'active' ? trans('Active') : trans('Inactive')}
                 </span>
+            )
+        },
+        {
+            header: trans("Financial Tagging"),
+            key: 'inventory_account_id',
+            render: (item) => (
+                <div className="flex flex-col gap-1 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-indigo-600 font-bold">
+                        <span className="px-1.5 py-0.5 rounded bg-indigo-50 border border-indigo-100">INV</span>
+                        {item.inventory_account?.code || '-'}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-orange-600 font-bold">
+                        <span className="px-1.5 py-0.5 rounded bg-orange-50 border border-orange-100">EXP</span>
+                        {item.expense_account?.code || '-'}
+                    </div>
+                </div>
             )
         },
         {
@@ -381,7 +402,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                 </div>
             </div>
 
-            <ItemForm isOpen={isItemFormOpen} onClose={() => setIsItemFormOpen(false)} item={editingItem} categories={categories} units={units} />
+            <ItemForm isOpen={isItemFormOpen} onClose={() => setIsItemFormOpen(false)} item={editingItem} categories={categories} units={units} glAccounts={gl_accounts} />
             <CategoryForm isOpen={isCategoryFormOpen} onClose={() => setIsCategoryFormOpen(false)} category={editingCategory} />
             <UnitForm isOpen={isUnitFormOpen} onClose={() => setIsUnitFormOpen(false)} unit={editingUnit} />
         </AuthenticatedLayout>
