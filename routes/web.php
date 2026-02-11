@@ -18,6 +18,12 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::post('/language', function (Illuminate\Http\Request $request) {
+    $request->validate(['locale' => 'required|string|in:en,id']);
+    session(['locale' => $request->locale]);
+    return back();
+})->name('language.update');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

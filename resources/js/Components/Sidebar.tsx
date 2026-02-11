@@ -2,12 +2,14 @@ import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import SidebarLink from '@/Components/SidebarLink';
 import { LayoutDashboard, Network, Package } from 'lucide-react';
+import { useTrans } from '@/hooks/useTrans';
 
 interface SidebarProps {
     isOpen: boolean;
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
+    const { trans } = useTrans();
     return (
         <aside
             className={`
@@ -38,7 +40,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         isOpen={isOpen}
                         icon={<LayoutDashboard size={20} />}
                     >
-                        Dashboard
+                        {trans('Dashboard')}
                     </SidebarLink>
 
                     <SidebarLink
@@ -47,7 +49,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         isOpen={isOpen}
                         icon={<Network size={20} />}
                     >
-                        Organization
+                        {trans('Organization')}
                     </SidebarLink>
 
                     <SidebarLink
@@ -56,7 +58,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         isOpen={isOpen}
                         icon={<Package size={20} />}
                     >
-                        Master Barang
+                        {trans('Items')}
                     </SidebarLink>
 
                     {/* Add more links here later */}

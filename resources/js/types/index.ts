@@ -9,7 +9,10 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
     auth: {
         user: User;
     };
-    ziggy: {
-        location: string;
+    locale: string;
+    translations: Record<string, string>;
+    flash: {
+        success: string | null;
+        error: string | null;
     };
 };

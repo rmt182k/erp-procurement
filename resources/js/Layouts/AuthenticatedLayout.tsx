@@ -3,22 +3,18 @@ import Dropdown from '@/Components/Dropdown';
 import Sidebar from '@/Components/Sidebar';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { usePage } from '@inertiajs/react';
-import { User, PageProps as BasePageProps } from '@/types';
+import { PageProps } from '@/types';
 import { Menu, X, ChevronDown, User as UserIcon, LogOut } from 'lucide-react';
 import { Toast } from '@/Components/Toast';
-
-interface PageProps extends BasePageProps {
-    flash: {
-        success: string | null;
-        error: string | null;
-    };
-}
+import { useTrans } from '@/hooks/useTrans';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const { auth, flash } = usePage<PageProps>().props;
+    const { trans } = useTrans();
     const user = auth.user;
 
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -83,7 +79,8 @@ export default function Authenticated({
                                 </div>
                             </div>
 
-                            <div className="hidden sm:flex sm:items-center sm:ms-6">
+                            <div className="hidden sm:flex sm:items-center sm:ms-6 gap-x-4">
+                                <LanguageSwitcher />
                                 <div className="ms-3 relative">
                                     <Dropdown>
                                         <Dropdown.Trigger>
@@ -103,13 +100,13 @@ export default function Authenticated({
                                             <Dropdown.Link href={route('profile.edit')}>
                                                 <div className="flex items-center">
                                                     <UserIcon className="w-4 h-4 mr-2" />
-                                                    Profile
+                                                    {trans('Profile')}
                                                 </div>
                                             </Dropdown.Link>
                                             <Dropdown.Link href={route('logout')} method="post" as="button">
                                                 <div className="flex items-center">
                                                     <LogOut className="w-4 h-4 mr-2" />
-                                                    Log Out
+                                                    {trans('Log Out')}
                                                 </div>
                                             </Dropdown.Link>
                                         </Dropdown.Content>
@@ -123,22 +120,25 @@ export default function Authenticated({
                     <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' md:hidden'}>
                         <div className="pt-2 pb-3 space-y-1">
                             <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                Dashboard
+                                {trans('Dashboard')}
                             </ResponsiveNavLink>
                         </div>
 
                         <div className="pt-4 pb-1 border-t border-gray-200">
-                            <div className="px-4">
-                                <div className="font-medium text-base text-gray-800">
-                                    {user.name}
+                            <div className="px-4 flex justify-between items-center">
+                                <div>
+                                    <div className="font-medium text-base text-gray-800">
+                                        {user.name}
+                                    </div>
+                                    <div className="font-medium text-sm text-gray-500">{user.email}</div>
                                 </div>
-                                <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                                <LanguageSwitcher />
                             </div>
 
                             <div className="mt-3 space-y-1">
-                                <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('profile.edit')}>{trans('Profile')}</ResponsiveNavLink>
                                 <ResponsiveNavLink href={route('logout')} method="post" as="button">
-                                    Log Out
+                                    {trans('Log Out')}
                                 </ResponsiveNavLink>
                             </div>
                         </div>

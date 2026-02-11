@@ -12,6 +12,7 @@ import {
     Ruler,
     Search
 } from 'lucide-react';
+import { useTrans } from '@/hooks/useTrans';
 import { ItemForm } from './Partials/ItemForm';
 import { CategoryForm } from './Partials/CategoryForm';
 import { UnitForm } from './Partials/UnitForm';
@@ -57,6 +58,7 @@ function cls(...inputs: any[]) {
 type TabType = 'barang' | 'kategori' | 'satuan';
 
 export default function Index({ items, categories, units, filters }: Props) {
+    const { trans } = useTrans();
     const [activeTab, setActiveTab] = useState<TabType>('barang');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
@@ -74,19 +76,19 @@ export default function Index({ items, categories, units, filters }: Props) {
     const [editingUnit, setEditingUnit] = useState<ItemUnit | null>(null);
 
     const handleDeleteItem = (id: string) => {
-        if (confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
+        if (confirm(trans('Are you sure you want to delete this item?'))) {
             router.delete(route('items.destroy', id), { preserveScroll: true });
         }
     };
 
     const handleDeleteCategory = (id: string) => {
-        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+        if (confirm(trans('Are you sure you want to delete this category?'))) {
             router.delete(route('items.categories.destroy', id), { preserveScroll: true });
         }
     };
 
     const handleDeleteUnit = (id: string) => {
-        if (confirm('Apakah Anda yakin ingin menghapus satuan ini?')) {
+        if (confirm(trans('Are you sure you want to delete this unit?'))) {
             router.delete(route('items.units.destroy', id), { preserveScroll: true });
         }
     };
@@ -95,7 +97,7 @@ export default function Index({ items, categories, units, filters }: Props) {
 
     const itemColumns: Column<Item>[] = [
         {
-            header: "Info Barang",
+            header: trans("Info Barang"),
             key: 'name',
             sortable: true,
             render: (item) => (
@@ -106,7 +108,7 @@ export default function Index({ items, categories, units, filters }: Props) {
             )
         },
         {
-            header: "Harga",
+            header: trans("Harga"),
             key: 'price',
             sortable: true,
             align: 'right',
@@ -114,7 +116,7 @@ export default function Index({ items, categories, units, filters }: Props) {
             render: (item) => `Rp ${Number(item.price).toLocaleString('id-ID')}`
         },
         {
-            header: "Stok",
+            header: trans("Stok"),
             key: 'stock',
             sortable: true,
             align: 'center',
@@ -122,7 +124,7 @@ export default function Index({ items, categories, units, filters }: Props) {
             render: (item) => `${item.stock} ${item.unit?.abbreviation}`
         },
         {
-            header: "Status",
+            header: trans("Status"),
             key: 'status',
             className: 'whitespace-nowrap',
             render: (item) => (
@@ -130,7 +132,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                     "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
                     item.status === 'active' ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"
                 )}>
-                    {item.status === 'active' ? 'Aktif' : 'Non-aktif'}
+                    {item.status === 'active' ? trans('Active') : trans('Inactive')}
                 </span>
             )
         },
@@ -149,8 +151,8 @@ export default function Index({ items, categories, units, filters }: Props) {
     ];
 
     const categoryColumns: Column<ItemCategory>[] = [
-        { header: "Nama Kategori", key: 'name', sortable: true, className: 'font-semibold' },
-        { header: "Keterangan", key: 'description' },
+        { header: trans("Category Name"), key: 'name', sortable: true, className: 'font-semibold' },
+        { header: trans("Description"), key: 'description' },
         {
             header: "",
             align: 'right',
@@ -166,8 +168,8 @@ export default function Index({ items, categories, units, filters }: Props) {
     ];
 
     const unitColumns: Column<ItemUnit>[] = [
-        { header: "Nama Satuan", key: 'name', sortable: true, className: 'font-semibold' },
-        { header: "Singkatan", key: 'abbreviation', align: 'center', className: 'font-mono whitespace-nowrap' },
+        { header: trans("Unit Name"), key: 'name', sortable: true, className: 'font-semibold' },
+        { header: trans("Abbreviation"), key: 'abbreviation', align: 'center', className: 'font-mono whitespace-nowrap' },
         {
             header: "",
             align: 'right',
@@ -205,7 +207,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                 <div className="flex items-center justify-between">
                     <h2 className="font-semibold text-xl text-gray-800 leading-tight flex items-center gap-2">
                         <Package className="w-6 h-6 text-indigo-600" />
-                        Master Barang
+                        {trans('Master Items')}
                     </h2>
 
                     <button
@@ -217,19 +219,19 @@ export default function Index({ items, categories, units, filters }: Props) {
                         }}
                     >
                         <Plus className="w-4 h-4" />
-                        Tambah {activeTab === 'barang' ? 'Barang' : activeTab === 'kategori' ? 'Kategori' : 'Satuan'}
+                        {trans('Add')} {activeTab === 'barang' ? trans('Item') : activeTab === 'kategori' ? trans('Category') : trans('Unit')}
                     </button>
                 </div>
             }
         >
-            <Head title="Master Barang" />
+            <Head title={trans('Master Items')} />
 
             <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="flex border-b border-gray-100">
-                        <TabButton type="barang" label="Daftar Barang" icon={Package} />
-                        <TabButton type="kategori" label="Kelola Kategori" icon={Tags} />
-                        <TabButton type="satuan" label="Kelola Satuan" icon={Ruler} />
+                        <TabButton type="barang" label={trans("Item List")} icon={Package} />
+                        <TabButton type="kategori" label={trans("Manage Categories")} icon={Tags} />
+                        <TabButton type="satuan" label={trans("Manage Units")} icon={Ruler} />
                     </div>
 
                     <div className="p-6">
@@ -239,21 +241,21 @@ export default function Index({ items, categories, units, filters }: Props) {
                                     <DataTable
                                         data={filteredByCatItems}
                                         columns={itemColumns}
-                                        searchPlaceholder="Cari nama atau kode barang..."
+                                        searchPlaceholder={trans("Search item name or code...")}
                                         searchKeys={['name', 'code']}
                                         initialSort={{ key: 'name', order: 'asc' }}
                                         headerExtra={
                                             <div className="flex items-center gap-3">
                                                 <div className="flex items-center gap-2 border border-gray-100 rounded-lg p-1 bg-gray-50/50 shadow-sm">
-                                                    <button onClick={() => setViewMode('list')} className="p-1.5 rounded-md transition-all bg-white shadow text-indigo-600" title="Tampilan List"><ListIcon className="w-4 h-4" /></button>
-                                                    <button onClick={() => setViewMode('grid')} className="p-1.5 rounded-md transition-all text-gray-400" title="Tampilan Grid"><LayoutGrid className="w-4 h-4" /></button>
+                                                    <button onClick={() => setViewMode('list')} className="p-1.5 rounded-md transition-all bg-white shadow text-indigo-600" title={trans("List View")}><ListIcon className="w-4 h-4" /></button>
+                                                    <button onClick={() => setViewMode('grid')} className="p-1.5 rounded-md transition-all text-gray-400" title={trans("Grid View")}><LayoutGrid className="w-4 h-4" /></button>
                                                 </div>
                                                 <select
                                                     className="text-sm bg-gray-50/50 border-gray-100 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 min-w-[150px] py-2 font-medium text-gray-700 shadow-sm"
                                                     value={selectedCategory}
                                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                                 >
-                                                    <option value="">Semua Kategori</option>
+                                                    <option value="">{trans("All Categories")}</option>
                                                     {categories.map(cat => (
                                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                                     ))}
@@ -268,7 +270,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-indigo-500 transition-colors" />
                                                 <input
                                                     type="text"
-                                                    placeholder="Cari nama atau kode barang..."
+                                                    placeholder={trans("Search item name or code...")}
                                                     className="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all font-medium"
                                                 />
                                             </div>
@@ -282,7 +284,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                                                     value={selectedCategory}
                                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                                 >
-                                                    <option value="">Semua Kategori</option>
+                                                    <option value="">{trans("All Categories")}</option>
                                                     {categories.map(cat => (
                                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                                     ))}
@@ -318,7 +320,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                                 <DataTable
                                     data={categories}
                                     columns={categoryColumns}
-                                    searchPlaceholder="Cari nama kategori..."
+                                    searchPlaceholder={trans("Search category name...")}
                                     initialSort={{ key: 'name', order: 'asc' }}
                                 />
                             </div>
@@ -329,7 +331,7 @@ export default function Index({ items, categories, units, filters }: Props) {
                                 <DataTable
                                     data={units}
                                     columns={unitColumns}
-                                    searchPlaceholder="Cari nama atau singkatan satuan..."
+                                    searchPlaceholder={trans("Search unit name or abbreviation...")}
                                     searchKeys={['name', 'abbreviation']}
                                     initialSort={{ key: 'name', order: 'asc' }}
                                 />
