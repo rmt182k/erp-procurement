@@ -2,13 +2,17 @@
     <table style="border: none;">
         <tr style="border: none;">
             <td style="border: none; width: 50%;">
-                <h1 style="color: #4f46e5; margin: 0;">PURCHASE ORDER</h1>
-                <p style="color: #666; font-size: 14px;">#{{ $po->doc_number }}</p>
+                <p class="font-bold" style="margin: 0; font-size: 16px; color: {{ $branding['subtitle_color'] === '#64748b' ? '#000' : $branding['subtitle_color'] }}">{{ config('app.name') }}</p>
+                <div style="margin-top: 5px; color: {{ $branding['subtitle_color'] }}; font-size: 11px;">
+                    <p style="margin: 2px 0;">Order Date: <span style="font-weight: bold; color: {{ $branding['accent_color'] }};">{{ $po->order_date->format('d M Y') }}</span></p>
+                    <p style="margin: 2px 0;">Status: <span style="text-transform: uppercase; font-weight: bold; color: {{ $branding['accent_color'] }};">{{ $po->status }}</span></p>
+                </div>
             </td>
-            <td style="border: none; width: 50%; text-align: right;">
-                <p class="font-bold" style="margin: 0;">{{ config('app.name') }}</p>
-                <p style="margin: 2px 0;">Order Date: {{ $po->order_date->format('d M Y') }}</p>
-                <p style="margin: 2px 0;">Status: <span style="text-transform: uppercase;">{{ $po->status }}</span></p>
+            <td style="border: none; width: 50%; text-align: right; vertical-align: top;">
+                <h1 style="color: {{ $branding['title_color'] }}; margin: 0; text-transform: uppercase; font-size: 28px; line-height: 1; letter-spacing: -1px;">
+                    {{ $branding['title_text'] }}
+                </h1>
+                <p style="color: {{ $branding['subtitle_color'] }}; font-family: monospace; font-size: 12px; margin-top: 5px; opacity: 0.8;">DOC NO: {{ $po->doc_number }}</p>
             </td>
         </tr>
     </table>

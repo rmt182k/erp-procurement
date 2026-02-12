@@ -18,6 +18,9 @@ class DocumentTemplate extends Model
         'margin_bottom',
         'margin_left',
         'margin_right',
+        'title_color',
+        'subtitle_color',
+        'accent_color',
     ];
 
     protected $casts = [

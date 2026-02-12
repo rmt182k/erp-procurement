@@ -15,12 +15,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            DocumentTemplateSeeder::class,
             CurrencySeeder::class,
             RBACSeeder::class,
             ProcurementTypeSeeder::class,
             GLAccountSeeder::class,
             MasterDataSeeder::class,
             ItemModuleSeeder::class,
+            PurchaseRequisitionSeeder::class,
         ]);
     }
 }

@@ -13,6 +13,7 @@ use App\Services\PRNumberingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Services\PdfService;
 use Exception;
 
 class PurchaseRequisitionController extends Controller
@@ -20,15 +21,18 @@ class PurchaseRequisitionController extends Controller
     protected $budgetService;
     protected $approvalService;
     protected $numberingService;
+    protected $pdfService;
 
     public function __construct(
         BudgetService $budgetService,
         ApprovalService $approvalService,
-        PRNumberingService $numberingService
+        PRNumberingService $numberingService,
+        PdfService $pdfService
     ) {
         $this->budgetService = $budgetService;
         $this->approvalService = $approvalService;
         $this->numberingService = $numberingService;
+        $this->pdfService = $pdfService;
     }
 
     public function index()
@@ -43,7 +47,7 @@ class PurchaseRequisitionController extends Controller
         return Inertia::render('Procurement/PurchaseRequisitions/Form', [
             'procurementTypes' => ProcurementType::where('is_active', true)->get(),
             'costCenters' => CostCenter::where('is_active', true)->get(),
-            'items' => Item::with('unit')->get(),
+            'items' => Item::with(['category', 'unit'])->get(),
             'vendors' => Vendor::all(),
         ]);
     }
@@ -76,8 +80,16 @@ class PurchaseRequisitionController extends Controller
                 'status' => PurchaseRequisition::STATUS_DRAFT,
             ]);
 
+            $procType = ProcurementType::findOrFail($validated['procurement_type_id']);
+
             $total = 0;
-            foreach ($validated['items'] as $itemData) {
+            foreach ($validated['items'] as $index => $itemData) {
+                // Server-side validation for item type
+                $item = Item::with('category')->findOrFail($itemData['item_id']);
+                if ($procType->is_service !== $item->category->is_service) {
+                    throw new Exception("Item '{$item->name}' does not match the procurement type (" . ($procType->is_service ? 'Service' : 'Goods') . ").");
+                }
+
                 $subtotal = $itemData['quantity'] * $itemData['estimated_unit_price'];
                 $pr->items()->create(array_merge($itemData, ['subtotal' => $subtotal]));
                 $total += $subtotal;
@@ -149,5 +161,17 @@ class PurchaseRequisitionController extends Controller
         return Inertia::render('Procurement/PurchaseRequisitions/Show', [
             'requisition' => $purchaseRequisition
         ]);
+    }
+
+    public function print(PurchaseRequisition $purchaseRequisition)
+    {
+        $purchaseRequisition->load(['items.item.unit', 'requester', 'procurementType', 'costCenter', 'department', 'suggestedVendor', 'approvals.approver']);
+
+        $pdf = $this->pdfService->loadView('PR', 'pdf.pr.modern', [
+            'pr' => $purchaseRequisition
+        ]);
+
+        $filename = 'PR-' . str_replace(['/', '\\'], '-', $purchaseRequisition->doc_number) . '.pdf';
+        return $pdf->download($filename);
     }
 }

@@ -14,10 +14,11 @@ class ItemModuleSeeder extends Seeder
     {
         $categoryModels = [];
         $categories = [
-            ['name' => 'Elektronik', 'description' => 'Perangkat elektronik dan aksesoris'],
-            ['name' => 'Furnitur', 'description' => 'Mebel kantor dan rumah tangga'],
-            ['name' => 'Alat Tulis', 'description' => 'Perlengkapan alat tulis kantor'],
-            ['name' => 'Otomotif', 'description' => 'Suku cadang dan perlengkapan otomotif'],
+            ['name' => 'Elektronik', 'description' => 'Perangkat elektronik dan aksesoris', 'is_service' => false],
+            ['name' => 'Furnitur', 'description' => 'Mebel kantor dan rumah tangga', 'is_service' => false],
+            ['name' => 'Alat Tulis', 'description' => 'Perlengkapan alat tulis kantor', 'is_service' => false],
+            ['name' => 'Jasa Konsultasi', 'description' => 'Layanan konsultasi profesional', 'is_service' => true],
+            ['name' => 'Sewa Alat', 'description' => 'Layanan penyewaan peralatan', 'is_service' => true],
         ];
 
         foreach ($categories as $category) {

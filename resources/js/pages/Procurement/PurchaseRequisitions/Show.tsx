@@ -11,6 +11,7 @@ import {
     XCircle,
     AlertCircle,
     ArrowLeft,
+    Printer,
     Send,
     Ban
 } from 'lucide-react';
@@ -88,6 +89,15 @@ export default function Show({ requisition }: Props) {
                         </Link>
 
                         <div className="flex gap-3">
+                            <a
+                                href={route('purchase-requisitions.print', requisition.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
+                            >
+                                <Printer size={16} className="mr-2" /> {trans('Print PR')}
+                            </a>
+
                             {requisition.status === 'DRAFT' && (
                                 <PrimaryButton
                                     onClick={() => submitPr(route('purchase-requisitions.submit', requisition.id))}
@@ -309,6 +319,6 @@ export default function Show({ requisition }: Props) {
                     </div>
                 </form>
             </Modal>
-        </AuthenticatedLayout>
+        </AuthenticatedLayout >
     );
 }

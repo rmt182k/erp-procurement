@@ -85,19 +85,12 @@
 
         .footer {
             position: fixed;
-
-            bottom: - {
-                    {
-                    $branding['margins']['bottom']
-                }
-            }
-
-            mm;
+            bottom: -15mm;
             left: 0;
             width: 100%;
             text-align: center;
             font-size: 10px;
-            color: #777;
+            color: #aaa;
         }
 
         .content {
@@ -140,20 +133,27 @@
 </head>
 
 <body>
-    @if($branding['mode'] === 'Image')
+    <!-- Branding Assets (Images/Letterheads/Stamps) -->
     @foreach($branding['branding_assets'] as $asset)
-    @if(isset($asset['full_path']))
-    <img src="{{ $asset['full_path'] }}"
+    @if(isset($asset['base64']))
+    <img src="{{ $asset['base64'] }}"
         style="position: fixed; 
-                           top: {{ $asset['top'] - $branding['margins']['top'] }}mm; 
-                           left: {{ $asset['left'] - $branding['margins']['left'] }}mm; 
+                           top: {{ $asset['top'] }}mm; 
+                           left: {{ $asset['left'] }}mm; 
                            width: {{ $asset['width'] ?? 50 }}mm; 
                            height: {{ $asset['height'] ?? 'auto' }};
                            opacity: {{ $asset['opacity'] ?? 1 }};
-                           z-index: {{ $asset['z_index'] ?? 1 }};">
+                           z-index: {{ $asset['z_index'] ?? -1 }};">
     @endif
     @endforeach
-    @elseif($branding['mode'] === 'HTML' && $branding['header_html'])
+
+    <!-- Custom Header Image -->
+    @if($branding['header_image'])
+    <img src="{{ $branding['header_image'] }}" class="header-image">
+    @endif
+
+    <!-- Custom HTML Header -->
+    @if($branding['header_html'])
     <div class="custom-header">
         {!! $branding['header_html'] !!}
     </div>

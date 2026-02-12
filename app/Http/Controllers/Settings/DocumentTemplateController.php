@@ -20,23 +20,29 @@ class DocumentTemplateController extends Controller
     public function update(Request $request, string $docType)
     {
         $validated = $request->validate([
-            'template_mode' => 'required|in:Blade,Image,HTML',
+            'template_mode' => 'nullable|in:Blade,Image,HTML',
+            'title_text' => 'nullable|string|max:255',
+            'title_color' => 'nullable|string|max:7',
+            'subtitle_color' => 'nullable|string|max:7',
+            'accent_color' => 'nullable|string|max:7',
             'view_name' => 'nullable|string',
             'header_image' => 'nullable|image|max:2048', // Legacy support
             'header_content' => 'nullable|string',
             'footer_content' => 'nullable|string',
-            'margin_top' => 'required|integer|min:0',
-            'margin_bottom' => 'required|integer|min:0',
-            'margin_left' => 'required|integer|min:0',
-            'margin_right' => 'required|integer|min:0',
+            'margin_top' => 'required|integer|min:35',
+            'margin_bottom' => 'required|integer|min:20',
+            'margin_left' => 'required|integer|min:10',
+            'margin_right' => 'required|integer|min:10',
             'branding_assets' => 'nullable|array',
+            'branding_assets.*.id' => 'nullable|string',
             'branding_assets.*.top' => 'nullable|numeric',
             'branding_assets.*.left' => 'nullable|numeric',
             'branding_assets.*.width' => 'nullable|numeric',
-            'branding_assets.*.height' => 'nullable|string', // 'auto' or numeric
+            'branding_assets.*.height' => 'nullable|string',
             'branding_assets.*.opacity' => 'nullable|numeric',
             'branding_assets.*.file' => 'nullable|file|image|max:2048',
             'branding_assets.*.path' => 'nullable|string',
+            'branding_assets.*.z_index' => 'nullable|integer',
         ]);
 
         // 0. Get old assets for comparison to clean up files
@@ -45,7 +51,7 @@ class DocumentTemplateController extends Controller
         $oldPaths = array_filter(array_column($oldAssets, 'path'));
 
         // 1. Storage Processing
-        $assets = $request->input('branding_assets', []);
+        $assets = $request->all()['branding_assets'] ?? [];
         $newPaths = array_filter(array_column($assets, 'path'));
 
         foreach ($assets as $index => &$asset) {
@@ -53,8 +59,9 @@ class DocumentTemplateController extends Controller
                 $path = $request->file("branding_assets.{$index}.file")->store('branding', 'public');
                 $asset['path'] = $path;
                 $newPaths[] = $path;
-                unset($asset['file']);
             }
+            // Always remove the file object before saving to JSON column
+            unset($asset['file']);
         }
 
         // Clean up physically removed files
@@ -65,7 +72,10 @@ class DocumentTemplateController extends Controller
 
         $template = DocumentTemplate::updateOrCreate(
             ['document_type' => $docType],
-            array_merge($validated, ['branding_assets' => $assets])
+            array_merge($validated, [
+                'branding_assets' => $assets,
+                'template_mode' => $validated['template_mode'] ?? 'Blade'
+            ])
         );
 
         if ($request->hasFile('header_image')) {

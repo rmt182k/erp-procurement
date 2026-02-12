@@ -16,6 +16,11 @@ class ItemCategory extends Model
         'id',
         'name',
         'description',
+        'is_service',
+    ];
+
+    protected $casts = [
+        'is_service' => 'boolean',
     ];
 
     public function items()

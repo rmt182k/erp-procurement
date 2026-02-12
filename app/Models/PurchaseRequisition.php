@@ -76,4 +76,14 @@ class PurchaseRequisition extends Model
     {
         return $this->morphMany(DocumentApproval::class, 'document');
     }
+
+    public function isEditable(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function isSubmitted(): bool
+    {
+        return $this->status === self::STATUS_SUBMITTED;
+    }
 }

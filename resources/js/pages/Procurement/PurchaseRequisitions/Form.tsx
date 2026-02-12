@@ -23,7 +23,7 @@ interface Item {
     id: string;
     name: string;
     code: string;
-    category: { name: string };
+    category: { name: string; is_service: boolean };
     unit: { name: string };
 }
 
@@ -58,13 +58,8 @@ export default function Form({ procurementTypes, costCenters, items, vendors }: 
     // Filter items based on procurement type (is_service)
     const filteredItems = useMemo(() => {
         if (!selectedType) return items;
-        // Logic: if is_service is true, only show items with 'Service' category
-        // Assuming category name is 'Service' or similar. 
-        // For now, let's filter if category name contains 'Service' (Case insensitive)
         return items.filter(item => {
-            const isItemService = item.category?.name?.toLowerCase().includes('service') ||
-                item.category?.name?.toLowerCase().includes('jasa');
-            return selectedType.is_service ? isItemService : !isItemService;
+            return !!item.category?.is_service === !!selectedType.is_service;
         });
     }, [selectedType, items]);
 

@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useTrans } from '@/hooks/useTrans';
 import { Settings2, Upload, Layout, Code, Save, Image as ImageIcon, Eye, FileText, Type, Trash2, X } from 'lucide-react';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -33,6 +33,10 @@ interface Template {
     margin_bottom: number;
     margin_left: number;
     margin_right: number;
+    title_text: string | null;
+    title_color: string | null;
+    subtitle_color: string | null;
+    accent_color: string | null;
 }
 
 interface Props {
@@ -47,6 +51,7 @@ const BLADE_VIEWS = [
 ];
 
 export default function Index({ templates }: Props) {
+    const { name: appName } = usePage().props as any;
     const { trans } = useTrans();
     const [activeTab, setActiveTab] = useState('PO');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -62,10 +67,14 @@ export default function Index({ templates }: Props) {
         margin_bottom: 25,
         margin_left: 20,
         margin_right: 20,
+        title_text: '',
+        title_color: '#000000',
+        subtitle_color: '#64748b',
+        accent_color: '#16a34a',
     }, [templates, activeTab]);
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        template_mode: currentTemplate.template_mode,
+        template_mode: currentTemplate.template_mode || 'Blade',
         view_name: currentTemplate.view_name || 'modern',
         header_image: null as File | null,
         branding_assets: (currentTemplate.branding_assets || []).map(a => ({ ...a, id: Math.random().toString(36).substr(2, 9) })),
@@ -75,6 +84,10 @@ export default function Index({ templates }: Props) {
         margin_bottom: currentTemplate.margin_bottom,
         margin_left: currentTemplate.margin_left,
         margin_right: currentTemplate.margin_right,
+        title_text: currentTemplate.title_text || '',
+        title_color: currentTemplate.title_color || '#000000',
+        subtitle_color: currentTemplate.subtitle_color || '#64748b',
+        accent_color: currentTemplate.accent_color || '#16a34a',
     });
 
     // Reset form when tab changes
@@ -91,6 +104,10 @@ export default function Index({ templates }: Props) {
             margin_bottom: currentTemplate.margin_bottom,
             margin_left: currentTemplate.margin_left,
             margin_right: currentTemplate.margin_right,
+            title_text: currentTemplate.title_text || '',
+            title_color: currentTemplate.title_color || '#000000',
+            subtitle_color: currentTemplate.subtitle_color || '#64748b',
+            accent_color: currentTemplate.accent_color || '#16a34a',
         }));
         setImagePreview(currentTemplate.header_image_path ? `/storage/${currentTemplate.header_image_path}` : null);
     }, [activeTab, currentTemplate]);
@@ -105,7 +122,7 @@ export default function Index({ templates }: Props) {
             width: 50,
             height: 'auto',
             opacity: 1,
-            z_index: data.branding_assets.length + 1
+            z_index: 20 + data.branding_assets.length
         };
         setData('branding_assets', [...data.branding_assets, newAsset]);
     };
@@ -123,6 +140,45 @@ export default function Index({ templates }: Props) {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('document-templates.update', activeTab));
+    };
+
+    const ColorPalette = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+        const colors = [
+            '#000000', '#1e293b', '#334155', '#475569', // Slates/Greys
+            '#ef4444', '#f97316', '#f59e0b', '#10b981', // Red, Orange, Amber, Green
+            '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', // Blue, Indigo, Violet, Fuchsia
+            '#164e63', '#065f46', '#7c2d12', '#4c1d95', // Darks
+        ];
+
+        return (
+            <div className="space-y-3">
+                <div className="grid grid-cols-8 gap-1.5 p-2 bg-white rounded-xl border border-gray-100 shadow-inner">
+                    {colors.map((c) => (
+                        <button
+                            key={c}
+                            type="button"
+                            onClick={() => onChange(c)}
+                            className={`h-6 w-6 rounded-md transition-all hover:scale-110 ${value === c ? 'ring-2 ring-indigo-500 ring-offset-1 z-10 scale-110' : 'ring-1 ring-black/5'}`}
+                            style={{ backgroundColor: c }}
+                        />
+                    ))}
+                    <div className="relative col-span-2">
+                        <input
+                            type="color"
+                            value={value || '#000000'}
+                            onChange={(e) => onChange(e.target.value)}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <div className="h-6 w-full rounded-md border border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden">
+                            <span className="text-[8px] font-black text-gray-400 uppercase">Custom</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 px-1">
+                    <span className="text-[10px] font-mono text-gray-400 font-bold uppercase tracking-widest">{value}</span>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -154,203 +210,261 @@ export default function Index({ templates }: Props) {
 
                         <form onSubmit={submit} className="space-y-8">
                             <div>
-                                <InputLabel value={trans('Template Mode')} className="mb-3 text-gray-400 uppercase tracking-widest text-[10px]" />
-                                <div className="grid grid-cols-3 gap-3">
-                                    {[
-                                        { id: 'Blade', label: 'System', icon: Layout, desc: 'Built-in presets' },
-                                        { id: 'Image', label: 'Letterhead', icon: ImageIcon, desc: 'Full image kop' },
-                                        { id: 'HTML', label: 'HTML', icon: Code, desc: 'Custom markup' }
-                                    ].map((mode) => (
-                                        <button
-                                            key={mode.id}
-                                            type="button"
-                                            onClick={() => setData('template_mode', mode.id as any)}
-                                            className={`flex flex-col items-center p-3 border-2 rounded-xl transition-all ${data.template_mode === mode.id ? 'border-indigo-600 bg-indigo-50/50 text-indigo-600 shadow-sm' : 'border-gray-100 hover:border-gray-200 grayscale opacity-70 hover:opacity-100 hover:grayscale-0'}`}
-                                        >
-                                            <mode.icon size={24} className="mb-2" />
-                                            <span className="font-bold text-xs">{mode.label}</span>
-                                            <span className="text-[10px] opacity-60 text-center mt-1 leading-tight">{mode.desc}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                                {data.template_mode === 'Blade' && (
-                                    <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                                        <InputLabel value={trans('System View Selection')} />
-                                        <select
-                                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm"
-                                            value={data.view_name}
-                                            onChange={(e) => setData('view_name', e.target.value)}
-                                        >
-                                            {BLADE_VIEWS.map(v => (
-                                                <option key={v.id} value={v.id}>{v.name}</option>
-                                            ))}
-                                        </select>
-                                        <p className="mt-2 text-[11px] text-blue-600 italic">Predefined professional layouts with logical numbering and spacing.</p>
+                                {/* 1. Primary Document Info (Title & Color) */}
+                                <div className="space-y-6 p-5 bg-indigo-50/30 rounded-2xl border border-indigo-100/50">
+                                    <div className="flex items-center gap-2 mb-2 text-indigo-700">
+                                        <Type size={16} />
+                                        <h4 className="font-bold text-xs uppercase tracking-widest">{trans('Typography & Colors')}</h4>
                                     </div>
-                                )}
 
-                                {data.template_mode === 'Image' && (
-                                    <div className="space-y-4">
-                                        <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <InputLabel value={trans('Add New Image Asset')} />
-                                                <span className="text-[10px] bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">{data.branding_assets.length} Assets</span>
-                                            </div>
-                                            <div className="relative border-2 border-dashed border-orange-200 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-orange-100/50 transition-colors group cursor-pointer">
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => e.target.files && addAsset(e.target.files[0])}
-                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                                />
-                                                <Upload size={32} className="text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-                                                <p className="text-xs font-medium text-orange-700">Click to add Logo, Stamp, or Kop</p>
-                                            </div>
+                                    <div>
+                                        <InputLabel value={trans('Document Title')} className="mb-1 text-gray-500 font-bold uppercase tracking-tight text-[10px]" />
+                                        <TextInput
+                                            className="w-full text-sm font-bold placeholder:font-normal"
+                                            placeholder={activeTab === 'PO' ? 'Purchase Order' : activeTab === 'PR' ? 'Purchase Requisition' : 'Invoice'}
+                                            value={data.title_text}
+                                            onChange={(e) => setData('title_text', e.target.value)}
+                                        />
+                                        <InputError message={errors.title_text} className="mt-1" />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-6">
+                                        <div>
+                                            <InputLabel value={trans('Title Color')} className="mb-2 text-gray-500 font-bold uppercase tracking-tight text-[10px]" />
+                                            <ColorPalette value={data.title_color} onChange={(val) => setData('title_color', val)} />
+                                            <InputError message={errors.title_color} className="mt-1" />
                                         </div>
 
-                                        {/* Asset List */}
-                                        <div className="space-y-3">
-                                            {data.branding_assets.map((asset, idx) => (
-                                                <div key={asset.id} className="p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-indigo-300 transition-all">
-                                                    <div className="flex items-center gap-3 mb-3">
-                                                        <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                            <img
-                                                                src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
-                                                                className="h-full w-full object-contain"
-                                                            />
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex justify-between items-start">
-                                                                <p className="text-[10px] font-black text-gray-500 uppercase truncate">Asset #{idx + 1}</p>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeAsset(asset.id)}
-                                                                    className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"
-                                                                    title="Remove Asset"
-                                                                >
-                                                                    <Trash2 size={14} />
-                                                                </button>
-                                                            </div>
-                                                            <p className="text-[9px] text-gray-400 truncate">{asset.file ? asset.file.name : 'Stored File'}</p>
-                                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <InputLabel value={trans('Label Color')} className="mb-2 text-gray-500 font-bold uppercase tracking-tight text-[10px]" />
+                                                <ColorPalette value={data.subtitle_color} onChange={(val) => setData('subtitle_color', val)} />
+                                                <InputError message={errors.subtitle_color} className="mt-1" />
+                                            </div>
+                                            <div>
+                                                <InputLabel value={trans('Accent Color (Status)')} className="mb-2 text-gray-500 font-bold uppercase tracking-tight text-[10px]" />
+                                                <ColorPalette value={data.accent_color} onChange={(val) => setData('accent_color', val)} />
+                                                <InputError message={errors.accent_color} className="mt-1" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. System Preset Selection */}
+                                <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Layout size={16} className="text-blue-600" />
+                                        <InputLabel value={trans('System Base Layout')} className="font-bold mb-0" />
+                                    </div>
+                                    <select
+                                        className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm"
+                                        value={data.view_name}
+                                        onChange={(e) => setData('view_name', e.target.value)}
+                                    >
+                                        {BLADE_VIEWS.map(v => (
+                                            <option key={v.id} value={v.id}>{v.name}</option>
+                                        ))}
+                                    </select>
+                                    <p className="mt-2 text-[10px] text-blue-600 italic">Select the core structure of the document.</p>
+                                </div>
+
+                                {/* 3. Image Branding (Logos/Letterheads) */}
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <ImageIcon size={16} className="text-orange-600" />
+                                                <InputLabel value={trans('Graphic Branding Assets')} className="font-bold mb-0" />
+                                            </div>
+                                            <span className="text-[10px] bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full font-bold">{data.branding_assets.length}</span>
+                                        </div>
+                                        <div className="relative border-2 border-dashed border-orange-200 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-orange-100/50 transition-colors group cursor-pointer shadow-inner">
+                                            <input
+                                                type="file"
+                                                onChange={(e) => e.target.files && addAsset(e.target.files[0])}
+                                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                            />
+                                            <Upload size={24} className="text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
+                                        </div>
+                                        <InputError message={errors.branding_assets as string} className="mt-1" />
+                                    </div>
+
+                                    {/* Asset List */}
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {data.branding_assets.map((asset, idx) => (
+                                            <div key={asset.id} className="p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-indigo-300 transition-all hover:shadow-md">
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="h-10 w-10 bg-gray-100 rounded border border-gray-100 overflow-hidden flex-shrink-0">
+                                                        <img
+                                                            src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
+                                                            className="h-full w-full object-contain"
+                                                        />
                                                     </div>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <div>
-                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Top (mm)</label>
-                                                            <input
-                                                                type="number"
-                                                                value={asset.top}
-                                                                onChange={(e) => updateAsset(asset.id, 'top', parseInt(e.target.value) || 0)}
-                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
-                                                            />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex justify-between items-start">
+                                                            <p className="text-[10px] font-black text-indigo-500 uppercase truncate">Asset #{idx + 1}</p>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeAsset(asset.id)}
+                                                                className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"
+                                                                title="Remove Asset"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
                                                         </div>
-                                                        <div>
-                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Left (mm)</label>
-                                                            <input
-                                                                type="number"
-                                                                value={asset.left}
-                                                                onChange={(e) => updateAsset(asset.id, 'left', parseInt(e.target.value) || 0)}
-                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Width (mm)</label>
-                                                            <input
-                                                                type="number"
-                                                                value={asset.width}
-                                                                onChange={(e) => updateAsset(asset.id, 'width', parseInt(e.target.value) || 0)}
-                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
-                                                            />
-                                                        </div>
+                                                        <p className="text-[9px] text-gray-400 truncate">{asset.file ? asset.file.name : 'Stored File'}</p>
                                                     </div>
                                                 </div>
-                                            ))}
+                                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                                    <div>
+                                                        <label className="text-[8px] text-gray-400 uppercase font-black">Layer</label>
+                                                        <select
+                                                            value={asset.z_index < 0 ? 'back' : 'front'}
+                                                            onChange={(e) => updateAsset(asset.id, 'z_index', e.target.value === 'back' ? -1 : 1)}
+                                                            className="w-full text-[10px] p-1.5 border rounded-lg focus:ring-1 focus:ring-indigo-500"
+                                                        >
+                                                            <option value="back">Behind Content</option>
+                                                            <option value="front">On Top of Content</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[8px] text-gray-400 uppercase font-black">Opacity ({Math.round(asset.opacity * 100)}%)</label>
+                                                        <input
+                                                            type="range"
+                                                            min="0.1"
+                                                            max="1"
+                                                            step="0.1"
+                                                            value={asset.opacity}
+                                                            onChange={(e) => updateAsset(asset.id, 'opacity', parseFloat(e.target.value))}
+                                                            className="w-full mt-2 accent-indigo-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2 mt-2">
+                                                    <div>
+                                                        <label className="text-[8px] text-gray-400 uppercase font-black">Top (mm)</label>
+                                                        <input
+                                                            type="number"
+                                                            value={asset.top}
+                                                            onChange={(e) => updateAsset(asset.id, 'top', parseInt(e.target.value) || 0)}
+                                                            className="w-full text-[10px] p-1.5 border rounded-lg focus:ring-1 focus:ring-indigo-500"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[8px] text-gray-400 uppercase font-black">Left (mm)</label>
+                                                        <input
+                                                            type="number"
+                                                            value={asset.left}
+                                                            onChange={(e) => updateAsset(asset.id, 'left', parseInt(e.target.value) || 0)}
+                                                            className="w-full text-[10px] p-1.5 border rounded-lg focus:ring-1 focus:ring-indigo-500"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[8px] text-gray-400 uppercase font-black">Width (mm)</label>
+                                                        <input
+                                                            type="number"
+                                                            value={asset.width}
+                                                            onChange={(e) => updateAsset(asset.id, 'width', parseInt(e.target.value) || 0)}
+                                                            className="w-full text-[10px] p-1.5 border rounded-lg focus:ring-1 focus:ring-indigo-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 4. Custom HTML Markup */}
+                                <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Code size={16} className="text-purple-600" />
+                                        <InputLabel value={trans('Advanced HTML Header')} className="font-bold mb-0" />
+                                    </div>
+                                    <textarea
+                                        className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-[10px] font-mono bg-gray-900 text-green-400 leading-relaxed"
+                                        rows={5}
+                                        value={data.header_content}
+                                        onChange={(e) => setData('header_content', e.target.value)}
+                                        placeholder="<div style='text-align: center;'><h1>MY COMPANY</h1></div>"
+                                    />
+                                    <p className="mt-2 text-[10px] text-purple-600 leading-tight italic">Inject custom raw HTML into the header safe zone.</p>
+                                </div>
+
+                                <div className="grid grid-cols-4 gap-3">
+                                    <div className="col-span-2">
+                                        <InputLabel value={trans('Header Safe Area')} className="text-[10px] text-indigo-500 uppercase font-black" />
+                                        <div className="relative">
+                                            <TextInput
+                                                type="number"
+                                                min={35}
+                                                className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                                value={data.margin_top}
+                                                onChange={(e) => setData('margin_top', parseInt(e.target.value) || 0)}
+                                                onBlur={(e) => setData('margin_top', Math.max(35, parseInt(e.target.value) || 35))}
+                                            />
+                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">TOP</span>
+                                        </div>
+                                        <InputError message={errors.margin_top} className="mt-1" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <InputLabel value={trans('Footer Safe Area')} className="text-[10px] text-indigo-500 uppercase font-black" />
+                                        <div className="relative">
+                                            <TextInput
+                                                type="number"
+                                                min={20}
+                                                className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                                value={data.margin_bottom}
+                                                onChange={(e) => setData('margin_bottom', parseInt(e.target.value) || 0)}
+                                                onBlur={(e) => setData('margin_bottom', Math.max(20, parseInt(e.target.value) || 20))}
+                                            />
+                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">BTM</span>
+                                        </div>
+                                        <InputError message={errors.margin_bottom} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <InputLabel value={trans('Side Padding')} className="text-[10px] text-gray-500 uppercase font-black" />
+                                        <div className="relative">
+                                            <TextInput
+                                                type="number"
+                                                min={10}
+                                                className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                                value={data.margin_left}
+                                                onChange={(e) => setData('margin_left', parseInt(e.target.value) || 0)}
+                                                onBlur={(e) => setData('margin_left', Math.max(10, parseInt(e.target.value) || 10))}
+                                            />
+                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">L</span>
                                         </div>
                                     </div>
-                                )}
-
-                                {data.template_mode === 'HTML' && (
-                                    <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100">
-                                        <InputLabel value={trans('Custom Header HTML')} />
-                                        <textarea
-                                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-xs font-mono bg-gray-900 text-green-400 leading-relaxed"
-                                            rows={8}
-                                            value={data.header_content}
-                                            onChange={(e) => setData('header_content', e.target.value)}
-                                            placeholder="<div style='text-align: center;'><h1>MY COMPANY</h1></div>"
-                                        />
-                                        <p className="mt-2 text-[10px] text-purple-600 leading-tight">Use inline styles for best compatibility with domPDF.</p>
+                                    <div>
+                                        <InputLabel value={trans('Side Padding')} className="text-[10px] text-gray-500 uppercase font-black" />
+                                        <div className="relative">
+                                            <TextInput
+                                                type="number"
+                                                min={10}
+                                                className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
+                                                value={data.margin_right}
+                                                onChange={(e) => setData('margin_right', parseInt(e.target.value) || 0)}
+                                                onBlur={(e) => setData('margin_right', Math.max(10, parseInt(e.target.value) || 10))}
+                                            />
+                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">R</span>
+                                        </div>
                                     </div>
-                                )}
+                                </div>
+
+                                <div>
+                                    <InputLabel value={trans('Custom Footer HTML (Optional)')} className="mb-2" />
+                                    <textarea
+                                        className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-xs p-3"
+                                        rows={3}
+                                        value={data.footer_content}
+                                        onChange={(e) => setData('footer_content', e.target.value)}
+                                        placeholder="<p style='color: grey;'>Generated automatically by ERP</p>"
+                                    />
+                                </div>
+                                <PrimaryButton disabled={processing} className="w-full h-12 justify-center rounded-xl text-md shadow-lg shadow-indigo-200">
+                                    <Save size={18} className="mr-2" /> {trans('Save Layout Settings')}
+                                </PrimaryButton>
                             </div>
-
-                            <div className="grid grid-cols-4 gap-3">
-                                <div>
-                                    <InputLabel value={trans('Top')} className="text-[10px] text-gray-500 uppercase font-black" />
-                                    <div className="relative">
-                                        <TextInput
-                                            type="number"
-                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
-                                            value={data.margin_top}
-                                            onChange={(e) => setData('margin_top', parseInt(e.target.value) || 0)}
-                                        />
-                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">T</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <InputLabel value={trans('Bottom')} className="text-[10px] text-gray-500 uppercase font-black" />
-                                    <div className="relative">
-                                        <TextInput
-                                            type="number"
-                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
-                                            value={data.margin_bottom}
-                                            onChange={(e) => setData('margin_bottom', parseInt(e.target.value) || 0)}
-                                        />
-                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">B</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <InputLabel value={trans('Left')} className="text-[10px] text-gray-500 uppercase font-black" />
-                                    <div className="relative">
-                                        <TextInput
-                                            type="number"
-                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
-                                            value={data.margin_left}
-                                            onChange={(e) => setData('margin_left', parseInt(e.target.value) || 0)}
-                                        />
-                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">L</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <InputLabel value={trans('Right')} className="text-[10px] text-gray-500 uppercase font-black" />
-                                    <div className="relative">
-                                        <TextInput
-                                            type="number"
-                                            className="mt-1 block w-full pl-7 px-1 text-xs font-bold h-9"
-                                            value={data.margin_right}
-                                            onChange={(e) => setData('margin_right', parseInt(e.target.value) || 0)}
-                                        />
-                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">R</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <InputLabel value={trans('Custom Footer HTML (Optional)')} className="mb-2" />
-                                <textarea
-                                    className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-xs p-3"
-                                    rows={3}
-                                    value={data.footer_content}
-                                    onChange={(e) => setData('footer_content', e.target.value)}
-                                    placeholder="<p style='color: grey;'>Generated automatically by ERP</p>"
-                                />
-                            </div>
-
-                            <PrimaryButton disabled={processing} className="w-full h-12 justify-center rounded-xl text-md shadow-lg shadow-indigo-200">
-                                <Save size={18} className="mr-2" /> {trans('Save Layout Settings')}
-                            </PrimaryButton>
                         </form>
                     </div>
 
@@ -376,48 +490,63 @@ export default function Index({ templates }: Props) {
                                     className="absolute top-0 left-0 w-full overflow-hidden flex flex-col transition-all duration-300"
                                     style={{ height: `${data.margin_top}mm` }}
                                 >
-                                    {data.template_mode === 'Image' && data.branding_assets.map((asset) => (
-                                        <img
-                                            key={asset.id}
-                                            src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
-                                            className="absolute"
-                                            style={{
-                                                top: `${asset.top}mm`,
-                                                left: `${asset.left}mm`,
-                                                width: `${asset.width}mm`,
-                                                height: asset.height,
-                                                opacity: asset.opacity,
-                                                zIndex: asset.z_index
-                                            }}
-                                            alt="Asset Preview"
-                                        />
-                                    ))}
+                                    {/* Combined Branded Preview */}
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        {/* Image Assets */}
+                                        {data.branding_assets.map((asset) => (
+                                            <img
+                                                key={asset.id}
+                                                src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
+                                                className="absolute"
+                                                style={{
+                                                    top: `${asset.top}mm`,
+                                                    left: `${asset.left}mm`,
+                                                    width: `${asset.width}mm`,
+                                                    height: asset.height,
+                                                    opacity: asset.opacity,
+                                                    zIndex: asset.z_index < 0 ? 5 : 20
+                                                }}
+                                                alt="Asset Preview"
+                                            />
+                                        ))}
 
-                                    {data.template_mode === 'HTML' && (
-                                        <div className="w-full h-full bg-white transition-opacity duration-300" dangerouslySetInnerHTML={{ __html: data.header_content }} />
-                                    )}
+                                        {/* Custom HTML Header */}
+                                        {data.header_content && (
+                                            <div
+                                                className="absolute inset-0 z-0"
+                                                dangerouslySetInnerHTML={{ __html: data.header_content }}
+                                            />
+                                        )}
+                                    </div>
 
-                                    {data.template_mode === 'Blade' && (
-                                        <div className={`flex-1 flex flex-col justify-center px-12 transition-all duration-500 ${data.view_name === 'modern' ? 'border-b-4 border-indigo-600 bg-gradient-to-r from-indigo-50/30 to-transparent' : data.view_name === 'classic' ? 'border-b-2 border-gray-800 bg-gray-50/50' : 'border-b-[1px] border-gray-200 bg-white'}`}>
-                                            <div className={`flex justify-between items-start ${data.view_name === 'classic' ? 'flex-col items-center text-center gap-4' : ''}`}>
-                                                <div className={`space-y-1 ${data.view_name === 'classic' ? 'order-2' : ''}`}>
-                                                    <div className={`h-8 rounded-md shadow-sm transition-all ${data.view_name === 'modern' ? 'w-40 bg-indigo-700' : data.view_name === 'classic' ? 'w-56 bg-gray-800' : 'w-32 bg-gray-400'}`}></div>
-                                                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
-                                                    <div className="h-3 w-28 bg-gray-100 rounded"></div>
+                                    {/* Layout Preset Preview */}
+                                    <div className={`flex-1 flex flex-col justify-center px-12 transition-all duration-500 z-10 ${data.view_name === 'modern' ? 'border-b-4 border-indigo-600 bg-gradient-to-r from-indigo-50/30 to-transparent' : data.view_name === 'classic' ? 'border-b-2 border-gray-800 bg-gray-50/50' : 'border-b-[1px] border-gray-200 bg-white'}`}>
+                                        <div className={`flex justify-between items-start ${data.view_name === 'classic' ? 'flex-col items-center text-center gap-4' : ''}`}>
+                                            <div className={`space-y-1 ${data.view_name === 'classic' ? 'order-2' : ''}`}>
+                                                <div className={`transition-all flex items-center`}>
+                                                    <span className={`text-xl font-black tracking-tighter uppercase whitespace-nowrap`} style={{ color: data.subtitle_color === '#64748b' ? undefined : data.subtitle_color }}>{appName}</span>
                                                 </div>
-                                                <div className={`${data.view_name === 'classic' ? 'order-1 w-full border-b border-gray-200 pb-2 mb-2' : 'text-right'}`}>
-                                                    <div className={`font-black uppercase tracking-tighter transition-all ${data.view_name === 'modern' ? 'text-2xl text-indigo-900' : data.view_name === 'classic' ? 'text-3xl text-gray-900 font-serif' : 'text-xl text-gray-600'}`}>
-                                                        {activeTab === 'PO' ? 'Purchase Order' : activeTab === 'PR' ? 'Purchase Requisition' : 'Invoice'}
-                                                    </div>
-                                                    <div className="text-xs font-mono text-gray-400 mt-1">DOC NO: {activeTab === 'PO' ? 'PO' : activeTab === 'PR' ? 'PR' : 'INV'}/2026/0001</div>
+                                                <div className="space-y-0.5">
+                                                    <div className="text-[10px] font-bold whitespace-nowrap" style={{ color: data.subtitle_color }}>{trans('Request Date')}: <span className="font-bold uppercase" style={{ color: data.accent_color }}>2026-02-13</span></div>
+                                                    <div className="text-[10px] font-bold whitespace-nowrap" style={{ color: data.subtitle_color }}>{trans('Required Date')}: <span className="font-bold uppercase" style={{ color: data.accent_color }}>2026-02-20</span></div>
+                                                    <div className="text-[10px] font-bold whitespace-nowrap" style={{ color: data.subtitle_color }}>{trans('Status')}: <span className="uppercase" style={{ color: data.accent_color }}>DRAFT</span></div>
                                                 </div>
                                             </div>
+                                            <div className={`${data.view_name === 'classic' ? 'order-1 w-full border-b border-gray-200 pb-2 mb-2' : 'text-right'}`}>
+                                                <div
+                                                    className={`font-black uppercase tracking-tighter transition-all ${data.view_name === 'modern' ? 'text-2xl' : data.view_name === 'classic' ? 'text-3xl font-serif' : 'text-xl text-gray-600'}`}
+                                                    style={{ color: data.title_color || undefined }}
+                                                >
+                                                    {data.title_text || (activeTab === 'PO' ? 'Purchase Order' : activeTab === 'PR' ? 'Purchase Requisition' : 'Invoice')}
+                                                </div>
+                                                <div className="text-xs font-mono mt-1 opacity-70" style={{ color: data.subtitle_color }}>DOC NO: {activeTab === 'PO' ? 'PO' : activeTab === 'PR' ? 'PR' : 'INV'}/2026/0001</div>
+                                            </div>
                                         </div>
-                                    )}
+                                    </div>
 
                                     {/* Margin Guide Overlay */}
                                     <div className="absolute inset-0 bg-blue-500/5 flex items-center justify-center border-b-[1px] border-dashed border-blue-400 opacity-50 pointer-events-none group-hover:opacity-100 transition-opacity">
-                                        <div className="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">Header Safe Zone: {data.margin_top}mm</div>
+                                        <div className="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">Header Safe Area: {data.margin_top}mm</div>
                                     </div>
                                 </div>
 
@@ -503,7 +632,7 @@ export default function Index({ templates }: Props) {
 
                                     {/* Margin Guide Overlay */}
                                     <div className="absolute inset-x-0 bottom-0 bg-red-500/5 flex items-center justify-center border-t-[1px] border-dashed border-red-400 opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ height: `${data.margin_bottom}mm` }}>
-                                        <div className="bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">Footer Safe Zone: {data.margin_bottom}mm</div>
+                                        <div className="bg-red-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">Footer Safe Area: {data.margin_bottom}mm</div>
                                     </div>
                                 </div>
 

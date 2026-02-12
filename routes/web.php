@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('purchase-requisitions', \App\Http\Controllers\PurchaseRequisitionController::class);
     Route::post('purchase-requisitions/{purchase_requisition}/submit', [\App\Http\Controllers\PurchaseRequisitionController::class, 'submit'])->name('purchase-requisitions.submit');
     Route::post('purchase-requisitions/{purchase_requisition}/cancel', [\App\Http\Controllers\PurchaseRequisitionController::class, 'cancel'])->name('purchase-requisitions.cancel');
+    Route::get('purchase-requisitions/{purchase_requisition}/print', [\App\Http\Controllers\PurchaseRequisitionController::class, 'print'])->name('purchase-requisitions.print');
 
     // Purchase Order Management
     Route::resource('purchase-orders', PurchaseOrderController::class);
