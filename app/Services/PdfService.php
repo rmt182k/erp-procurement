@@ -17,16 +17,24 @@ class PdfService
         $template = DocumentTemplate::where('document_type', $docType)->first();
 
         // 2. Prepare Template Data
+        $assets = $template->branding_assets ?? [];
+        foreach ($assets as &$asset) {
+            if ($asset['path']) {
+                $asset['full_path'] = public_path('storage/' . $asset['path']);
+            }
+        }
+
         $branding = [
             'mode' => $template->template_mode ?? 'Blade',
             'header_image' => $template->header_image_path ? public_path('storage/' . $template->header_image_path) : null,
+            'branding_assets' => $assets,
             'header_html' => $template->header_content,
             'footer_html' => $template->footer_content,
             'margins' => [
                 'top' => $template->margin_top ?? 0,
                 'bottom' => $template->margin_bottom ?? 0,
-                'left' => $template->margin_left ?? 15,
-                'right' => $template->margin_right ?? 15,
+                'left' => $template->margin_left ?? 20,
+                'right' => $template->margin_right ?? 20,
             ]
         ];
 

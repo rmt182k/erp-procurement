@@ -11,6 +11,7 @@ class DocumentTemplate extends Model
         'template_mode',
         'view_name',
         'header_image_path',
+        'branding_assets',
         'header_content',
         'footer_content',
         'margin_top',
@@ -24,5 +25,6 @@ class DocumentTemplate extends Model
         'margin_bottom' => 'integer',
         'margin_left' => 'integer',
         'margin_right' => 'integer',
+        'branding_assets' => 'array',
     ];
 }

@@ -140,8 +140,19 @@
 </head>
 
 <body>
-    @if($branding['mode'] === 'Image' && $branding['header_image'])
-    <img src="{{ $branding['header_image'] }}" class="header-image">
+    @if($branding['mode'] === 'Image')
+    @foreach($branding['branding_assets'] as $asset)
+    @if(isset($asset['full_path']))
+    <img src="{{ $asset['full_path'] }}"
+        style="position: fixed; 
+                           top: {{ $asset['top'] - $branding['margins']['top'] }}mm; 
+                           left: {{ $asset['left'] - $branding['margins']['left'] }}mm; 
+                           width: {{ $asset['width'] ?? 50 }}mm; 
+                           height: {{ $asset['height'] ?? 'auto' }};
+                           opacity: {{ $asset['opacity'] ?? 1 }};
+                           z-index: {{ $asset['z_index'] ?? 1 }};">
+    @endif
+    @endforeach
     @elseif($branding['mode'] === 'HTML' && $branding['header_html'])
     <div class="custom-header">
         {!! $branding['header_html'] !!}

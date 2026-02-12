@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { useTrans } from '@/hooks/useTrans';
-import { Settings2, Upload, Layout, Code, Save, Image as ImageIcon, Eye, FileText, Type } from 'lucide-react';
+import { Settings2, Upload, Layout, Code, Save, Image as ImageIcon, Eye, FileText, Type, Trash2, X } from 'lucide-react';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import InputLabel from '@/Components/InputLabel';
@@ -9,11 +9,24 @@ import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
 import { useState, useEffect, useMemo } from 'react';
 
+interface BrandingAsset {
+    id: string; // for local tracking
+    path: string | null;
+    file: File | null;
+    top: number;
+    left: number;
+    width: number;
+    height: string;
+    opacity: number;
+    z_index: number;
+}
+
 interface Template {
     document_type: string;
     template_mode: 'Blade' | 'Image' | 'HTML';
     view_name: string | null;
     header_image_path: string | null;
+    branding_assets: BrandingAsset[] | null;
     header_content: string | null;
     footer_content: string | null;
     margin_top: number;
@@ -55,6 +68,7 @@ export default function Index({ templates }: Props) {
         template_mode: currentTemplate.template_mode,
         view_name: currentTemplate.view_name || 'modern',
         header_image: null as File | null,
+        branding_assets: (currentTemplate.branding_assets || []).map(a => ({ ...a, id: Math.random().toString(36).substr(2, 9) })),
         header_content: currentTemplate.header_content || '',
         footer_content: currentTemplate.footer_content || '',
         margin_top: currentTemplate.margin_top,
@@ -70,6 +84,7 @@ export default function Index({ templates }: Props) {
             template_mode: currentTemplate.template_mode,
             view_name: currentTemplate.view_name || 'modern',
             header_image: null,
+            branding_assets: (currentTemplate.branding_assets || []).map(a => ({ ...a, id: Math.random().toString(36).substr(2, 9) })),
             header_content: currentTemplate.header_content || '',
             footer_content: currentTemplate.footer_content || '',
             margin_top: currentTemplate.margin_top,
@@ -80,15 +95,30 @@ export default function Index({ templates }: Props) {
         setImagePreview(currentTemplate.header_image_path ? `/storage/${currentTemplate.header_image_path}` : null);
     }, [activeTab, currentTemplate]);
 
-    // Handle Image Preview
-    useEffect(() => {
-        if (!data.header_image) {
-            return;
-        }
-        const objectUrl = URL.createObjectURL(data.header_image);
-        setImagePreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [data.header_image]);
+    const addAsset = (file: File) => {
+        const newAsset: BrandingAsset = {
+            id: Math.random().toString(36).substr(2, 9),
+            file: file,
+            path: null,
+            top: 10,
+            left: 10,
+            width: 50,
+            height: 'auto',
+            opacity: 1,
+            z_index: data.branding_assets.length + 1
+        };
+        setData('branding_assets', [...data.branding_assets, newAsset]);
+    };
+
+    const removeAsset = (id: string) => {
+        setData('branding_assets', data.branding_assets.filter(a => a.id !== id));
+    };
+
+    const updateAsset = (id: string, key: keyof BrandingAsset, value: any) => {
+        setData('branding_assets', data.branding_assets.map(a =>
+            a.id === id ? { ...a, [key]: value } : a
+        ));
+    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -163,20 +193,80 @@ export default function Index({ templates }: Props) {
                                 )}
 
                                 {data.template_mode === 'Image' && (
-                                    <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <InputLabel value={trans('Letterhead Image')} />
-                                            {imagePreview && <span className="text-[10px] bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">New Ready</span>}
+                                    <div className="space-y-4">
+                                        <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <InputLabel value={trans('Add New Image Asset')} />
+                                                <span className="text-[10px] bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">{data.branding_assets.length} Assets</span>
+                                            </div>
+                                            <div className="relative border-2 border-dashed border-orange-200 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-orange-100/50 transition-colors group cursor-pointer">
+                                                <input
+                                                    type="file"
+                                                    onChange={(e) => e.target.files && addAsset(e.target.files[0])}
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                />
+                                                <Upload size={32} className="text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
+                                                <p className="text-xs font-medium text-orange-700">Click to add Logo, Stamp, or Kop</p>
+                                            </div>
                                         </div>
-                                        <div className="relative border-2 border-dashed border-orange-200 rounded-xl p-6 flex flex-col items-center justify-center hover:bg-orange-100/50 transition-colors group cursor-pointer">
-                                            <input
-                                                type="file"
-                                                onChange={(e) => setData('header_image', e.target.files ? e.target.files[0] : null)}
-                                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                            />
-                                            <Upload size={32} className="text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-                                            <p className="text-xs font-medium text-orange-700">Click or drag kop surat image</p>
-                                            <p className="text-[10px] text-orange-500 mt-1">PNG, JPG up to 2MB</p>
+
+                                        {/* Asset List */}
+                                        <div className="space-y-3">
+                                            {data.branding_assets.map((asset, idx) => (
+                                                <div key={asset.id} className="p-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-indigo-300 transition-all">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <div className="h-10 w-10 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                            <img
+                                                                src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
+                                                                className="h-full w-full object-contain"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between items-start">
+                                                                <p className="text-[10px] font-black text-gray-500 uppercase truncate">Asset #{idx + 1}</p>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeAsset(asset.id)}
+                                                                    className="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"
+                                                                    title="Remove Asset"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                            <p className="text-[9px] text-gray-400 truncate">{asset.file ? asset.file.name : 'Stored File'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Top (mm)</label>
+                                                            <input
+                                                                type="number"
+                                                                value={asset.top}
+                                                                onChange={(e) => updateAsset(asset.id, 'top', parseInt(e.target.value) || 0)}
+                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Left (mm)</label>
+                                                            <input
+                                                                type="number"
+                                                                value={asset.left}
+                                                                onChange={(e) => updateAsset(asset.id, 'left', parseInt(e.target.value) || 0)}
+                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-400 uppercase font-black">Width (mm)</label>
+                                                            <input
+                                                                type="number"
+                                                                value={asset.width}
+                                                                onChange={(e) => updateAsset(asset.id, 'width', parseInt(e.target.value) || 0)}
+                                                                className="w-full text-xs p-1 border rounded focus:ring-1 focus:ring-indigo-500"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -286,9 +376,22 @@ export default function Index({ templates }: Props) {
                                     className="absolute top-0 left-0 w-full overflow-hidden flex flex-col transition-all duration-300"
                                     style={{ height: `${data.margin_top}mm` }}
                                 >
-                                    {data.template_mode === 'Image' && imagePreview && (
-                                        <img src={imagePreview} className="w-full h-full object-contain object-top" alt="Header Preview" />
-                                    )}
+                                    {data.template_mode === 'Image' && data.branding_assets.map((asset) => (
+                                        <img
+                                            key={asset.id}
+                                            src={asset.file ? URL.createObjectURL(asset.file) : `/storage/${asset.path}`}
+                                            className="absolute"
+                                            style={{
+                                                top: `${asset.top}mm`,
+                                                left: `${asset.left}mm`,
+                                                width: `${asset.width}mm`,
+                                                height: asset.height,
+                                                opacity: asset.opacity,
+                                                zIndex: asset.z_index
+                                            }}
+                                            alt="Asset Preview"
+                                        />
+                                    ))}
 
                                     {data.template_mode === 'HTML' && (
                                         <div className="w-full h-full bg-white transition-opacity duration-300" dangerouslySetInnerHTML={{ __html: data.header_content }} />
